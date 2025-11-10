@@ -1,0 +1,91 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Blog Scraper Lambda Function
+
+Globals:
+  Function:
+    Timeout: 900
+    MemorySize: 512
+    Architectures:
+      - arm64
+    Runtime: provided.al2023
+
+Parameters:
+  TableName:
+    Type: String
+    Default: ArticlesTable
+    Description: DynamoDB table name for articles
+  
+  BucketName:
+    Type: String
+    Default: blog-content-bucket
+    Description: S3 bucket name for images and HTML
+  
+  MaxArticlesPerSite:
+    Type: Number
+    Default: 10
+    Description: Maximum articles to scrape per site
+  
+  ScheduleExpression:
+    Type: String
+    Default: cron(0 9 * * ? *)
+    Description: EventBridge schedule expression (default daily at 9 AM UTC)
+
+Resources:
+  BlogScraperFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: blog-scraper
+      CodeUri: .
+      Handler: bootstrap
+      Description: Scrapes AI/tech blogs and stores in DynamoDB
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TableName
+          BUCKET_NAME: !Ref BucketName
+          MAX_ARTICLES_PER_SITE: !Ref MaxArticlesPerSite
+          RUST_LOG: info
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TableName
+        - S3CrudPolicy:
+            BucketName: !Ref BucketName
+        - Statement:
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+              Resource: '*'
+      Events:
+        DailySchedule:
+          Type: Schedule
+          Properties:
+            Schedule: !Ref ScheduleExpression
+            Description: Run blog scraper on schedule
+            Enabled: true
+      Tags:
+        Service: blog-scraper
+        Environment: production
+
+  # CloudWatch Log Group with retention
+  ScraperLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${BlogScraperFunction}
+      RetentionInDays: 7
+
+Outputs:
+  ScraperFunctionArn:
+    Description: Blog Scraper Lambda Function ARN
+    Value: !GetAtt BlogScraperFunction.Arn
+    Export:
+      Name: BlogScraperFunctionArn
+  
+  ScraperFunctionName:
+    Description: Blog Scraper Lambda Function Name
+    Value: !Ref BlogScraperFunction
+    Export:
+      Name: BlogScraperFunctionName
+  
+  LogGroupName:
+    Description: CloudWatch Log Group Name
+    Value: !Ref ScraperLogGroup
