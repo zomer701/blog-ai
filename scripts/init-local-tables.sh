@@ -49,7 +49,7 @@ aws dynamodb create-table \
      ProvisionedThroughput={ReadCapacityUnits=5,WriteCapacityUnits=5}" \
   --provisioned-throughput \
     ReadCapacityUnits=5,WriteCapacityUnits=5 \
-  --endpoint-url $ENDPOINT \
+  --endpoint-url http://localhost:8082 \
   > /dev/null
 
 echo -e "${GREEN}✅ ArticlesTable created${NC}"
