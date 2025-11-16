@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 # Web scraping
-reqwest = { version = "0.11", features = ["json", "cookies"] }
+reqwest = { version = "0.11", features = ["json", "cookies", "native-tls-vendored"] }
 scraper = "0.18"
 tokio = { version = "1", features = ["full"] }
 

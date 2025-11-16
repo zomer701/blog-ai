@@ -7,7 +7,7 @@ set -e
 echo "📝 Initializing Sample Data"
 echo "==========================="
 
-ENDPOINT="http://localhost:8000"
+ENDPOINT="http://localhost:8082"
 TABLE="ArticlesTable"
 
 # Colors

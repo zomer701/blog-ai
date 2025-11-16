@@ -7,7 +7,7 @@ set -e
 echo "🗄️  Initializing Local DynamoDB Tables"
 echo "======================================"
 
-ENDPOINT="http://localhost:8000"
+ENDPOINT="http://localhost:8082"
 
 # Colors
 GREEN='\033[0;32m'

@@ -252,7 +252,7 @@ For full local development, you need local DynamoDB and S3:
 docker run -d -p 4566:4566 localstack/localstack
 
 # Option 2: Use DynamoDB Local
-docker run -d -p 8000:8000 amazon/dynamodb-local
+docker run -d -p 8082:8000 amazon/dynamodb-local
 
 # Create local table
 aws dynamodb create-table \
@@ -262,7 +262,7 @@ aws dynamodb create-table \
   --key-schema \
     AttributeName=id,KeyType=HASH \
   --billing-mode PAY_PER_REQUEST \
-  --endpoint-url http://localhost:8000
+  --endpoint-url http://localhost:8082
 ```
 
 ## 🌐 Deployment to AWS
@@ -336,6 +336,7 @@ cat response.json
 ### Step 3: Deploy Blog Service API (3 minutes)
 
 ```bash
+
 cd blog-service-rust
 
 # Build for Lambda
@@ -723,7 +724,7 @@ aws dynamodb create-table \
   --attribute-definitions AttributeName=id,AttributeType=S \
   --key-schema AttributeName=id,KeyType=HASH \
   --billing-mode PAY_PER_REQUEST \
-  --endpoint-url http://localhost:8000
+  --endpoint-url http://localhost:8082
 
 # Or use production table
 export TABLE_NAME=blog-articles-prod
