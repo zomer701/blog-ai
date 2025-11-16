@@ -185,3 +185,5 @@ Pulumi.*.yaml
 *.seed
 *.pid
 *.pid.lock
+.idea
+.vscode
