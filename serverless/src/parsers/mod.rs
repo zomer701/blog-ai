@@ -105,7 +105,11 @@ pub(crate) async fn parse_openai_listing(
     _parser_name: &str,
 ) -> Result<Vec<ListingItem>> {
     let html = client.get(listing_url).send().await?.text().await?;
-    let document = Html::parse_document(&html);
+    parse_openai_listing_html(&html)
+}
+
+pub(crate) fn parse_openai_listing_html(html: &str) -> Result<Vec<ListingItem>> {
+    let document = Html::parse_document(html);
 
     let link_selector = Selector::parse("a[href^=\"/news/\"]").unwrap();
     let title_selector = Selector::parse("h3, h2, .text-base, .text-lg").unwrap();
@@ -144,9 +148,12 @@ pub(crate) async fn parse_openai_article(
     url: &str,
     _parser_name: &str,
 ) -> Result<ScrapedArticle> {
-
     let html = client.get(url).send().await?.text().await?;
-    let document = Html::parse_document(&html);
+    parse_openai_article_html(&html)
+}
+
+pub(crate) fn parse_openai_article_html(html: &str) -> Result<ScrapedArticle> {
+    let document = Html::parse_document(html);
 
     let title_selector = Selector::parse("h1").unwrap();
     let title = document

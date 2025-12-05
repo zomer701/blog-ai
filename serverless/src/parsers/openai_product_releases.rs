@@ -31,6 +31,10 @@ impl Parser for OpenAIProductReleasesParser {
 
     async fn parse_listing(&self) -> Result<Vec<ListingItem>> {
         let html = self.client.get(PRODUCT_RELEASES_URL).send().await?.text().await?;
+        info!(
+                "TAG:OPENAI_PRODUCT_LISTING html=\"{}\"",
+                &html.to_string()
+            );
         let articles = parse_openai_news_list(&html, OPENAI_BASE);
 
         if articles.is_empty() {

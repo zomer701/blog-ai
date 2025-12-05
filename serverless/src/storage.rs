@@ -111,43 +111,45 @@ impl Storage {
         content_text: &str,
         images: &[String],
     ) -> Result<()> {
-        let id = generate_id(parser_name, title, category, date_text);
-        let slug = {
-            let candidate = slugify(&format!("{}-{}", category, title));
-            if candidate.is_empty() {
-                id.clone()
-            } else {
-                candidate
-            }
-        };
-        let base_prefix = format!("{}/{}", parser_name, slug);
+        // let id = generate_id(parser_name, title, category, date_text);
+        // let slug = {
+        //     let candidate = slugify(&format!("{}-{}", category, title));
+        //     if candidate.is_empty() {
+        //         id.clone()
+        //     } else {
+        //         candidate
+        //     }
+        // };
+        // let base_prefix = format!("{}/{}", parser_name, slug);
 
-        let html_key = format!("{}/content.html", base_prefix);
-        let text_key = format!("{}/content.txt", base_prefix);
-        let images_key = format!("{}/images.json", base_prefix);
+        // let html_key = format!("{}/content.html", base_prefix);
+        // let text_key = format!("{}/content.txt", base_prefix);
+        // let images_key = format!("{}/images.json", base_prefix);
 
-        self.upload_string(&html_key, content_html, "text/html")
-            .await?;
-        self.upload_string(&text_key, content_text, "text/plain")
-            .await?;
+        // self.upload_string(&html_key, content_html, "text/html")
+        //     .await?;
+        // self.upload_string(&text_key, content_text, "text/plain")
+        //     .await?;
 
-        let images_payload = serde_json::to_vec(images)?;
-        self.upload_bytes(&images_key, &images_payload, "application/json")
-            .await?;
+        // let images_payload = serde_json::to_vec(images)?;
+        // self.upload_bytes(&images_key, &images_payload, "application/json")
+        //     .await?;
 
-        let metadata = ArticleMetadataRecord::new(
-            parser_name,
-            title,
-            category,
-            date_text,
-            url,
-            html_key.clone(),
-            text_key.clone(),
-            images_key.clone(),
-            images.to_vec(),
-        );
+        // let metadata = ArticleMetadataRecord::new(
+        //     parser_name,
+        //     title,
+        //     category,
+        //     date_text,
+        //     url,
+        //     html_key.clone(),
+        //     text_key.clone(),
+        //     images_key.clone(),
+        //     images.to_vec(),
+        // );
 
-        self.upsert_article_metadata(&metadata).await
+        // self.upsert_article_metadata(&metadata).await
+        Ok(())
+
     }
 
     async fn upsert_article_metadata(&self, metadata: &ArticleMetadataRecord) -> Result<()> {
