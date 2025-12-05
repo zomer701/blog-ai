@@ -50,3 +50,9 @@ Read more about invoking the function in [the Cargo Lambda documentation for the
 To deploy the project, run `cargo lambda deploy`. This will create an IAM role and a Lambda function in your AWS account.
 
 Read more about deploying your lambda function in [the Cargo Lambda documentation](https://www.cargo-lambda.info/commands/deploy.html).
+
+## Scrape.do authentication
+
+- The Scrape.do crawler reads `SCRAPEDO_TOKEN` directly, or if absent, uses `SCRAPEDO_TOKEN_SECRET_ARN` to fetch the token from AWS Secrets Manager.
+- In CDK we create the secret `scrapedo/token` and expose its ARN to the Lambda; set its value after deploy:
+  `aws secretsmanager put-secret-value --secret-id scrapedo/token --secret-string 'YOUR_TOKEN'`

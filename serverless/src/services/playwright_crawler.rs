@@ -97,7 +97,11 @@ impl PlaywrightCrawlerService {
         let mut new_articles = 0;
 
         for url in &site.articles {
-            info!("{}: Playwright scraping provided url {}", parser.name(), url);
+            info!(
+                "{}: Playwright scraping provided url {}",
+                parser.name(),
+                url
+            );
             let article = self.parse_article(parser, url).await?;
 
             self.storage
@@ -127,22 +131,28 @@ impl PlaywrightCrawlerService {
             .context("failed to fetch listing via Playwright")?;
 
         let items = match parser {
-            PlaywrightParser::OpenAIProductReleases => parse_openai_news_list(&listing_html, OPENAI_BASE)
-                .into_iter()
-                .map(|a| ListingItem {
-                    url: a.url,
-                    title: a.title,
-                    category: a.category,
-                    date_text: a.date_text,
-                })
-                .collect(),
+            PlaywrightParser::OpenAIProductReleases => {
+                parse_openai_news_list(&listing_html, OPENAI_BASE)
+                    .into_iter()
+                    .map(|a| ListingItem {
+                        url: a.url,
+                        title: a.title,
+                        category: a.category,
+                        date_text: a.date_text,
+                    })
+                    .collect()
+            }
             PlaywrightParser::OpenAISecurity => parse_openai_listing_html(&listing_html)?,
         };
 
         Ok(items)
     }
 
-    async fn parse_article(&self, _parser: &PlaywrightParser, url: &str) -> Result<crate::models::ScrapedArticle> {
+    async fn parse_article(
+        &self,
+        _parser: &PlaywrightParser,
+        url: &str,
+    ) -> Result<crate::models::ScrapedArticle> {
         let html = self
             .crawler
             .fetch_html(url)
@@ -256,9 +266,9 @@ impl PlaywrightParser {
     fn listing_url(&self) -> &'static str {
         match self {
             PlaywrightParser::OpenAIProductReleases => {
-                "https://openai.com/news/product-releases/?display=list"
+                crate::parsers::OPENAI_PRODUCT_RELEASES_LISTING
             }
-            PlaywrightParser::OpenAISecurity => "https://openai.com/news/security/",
+            PlaywrightParser::OpenAISecurity => crate::parsers::OPENAI_SECURITY_LISTING,
         }
     }
 }
@@ -286,7 +296,10 @@ async fn fetch_with_playwright(playwright: &Playwright, url: &str) -> Result<Str
         .await
         .with_context(|| format!("navigation failed for {}", url))?;
 
-    let html = page.content().await.context("failed to read page content")?;
+    let html = page
+        .content()
+        .await
+        .context("failed to read page content")?;
 
     // Close to release resources; ignore errors on close.
     let _ = browser.close().await;

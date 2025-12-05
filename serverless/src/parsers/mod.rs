@@ -10,6 +10,9 @@ pub mod openai_product_releases;
 pub mod openai_security;
 
 pub(crate) const OPENAI_BASE: &str = "https://openai.com";
+pub(crate) const OPENAI_PRODUCT_RELEASES_LISTING: &str =
+    "https://openai.com/news/product-releases/?display=list";
+pub(crate) const OPENAI_SECURITY_LISTING: &str = "https://openai.com/news/security/?display=list";
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Article {
@@ -43,7 +46,9 @@ pub fn parse_openai_news_list(html: &str, base_url: &str) -> Vec<Article> {
     let mut out = Vec::new();
 
     for row in document.select(&rows_sel) {
-        let Some(meta) = row.select(&meta_sel).next() else { continue };
+        let Some(meta) = row.select(&meta_sel).next() else {
+            continue;
+        };
 
         let category = meta
             .select(&first_div_sel)
@@ -58,10 +63,16 @@ pub fn parse_openai_news_list(html: &str, base_url: &str) -> Vec<Article> {
             .map(|t| t.text().collect::<String>())
             .map(|s| s.trim().to_string())
             .unwrap_or_default();
-        let date_iso = time_el.and_then(|t| t.value().attr("datetime")).map(|s| s.to_string());
+        let date_iso = time_el
+            .and_then(|t| t.value().attr("datetime"))
+            .map(|s| s.to_string());
 
-        let Some(link) = row.select(&link_sel).next() else { continue };
-        let Some(href) = link.value().attr("href") else { continue };
+        let Some(link) = row.select(&link_sel).next() else {
+            continue;
+        };
+        let Some(href) = link.value().attr("href") else {
+            continue;
+        };
 
         let url = if href.starts_with("http://") || href.starts_with("https://") {
             href.to_string()

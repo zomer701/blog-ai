@@ -1,12 +1,13 @@
-use lambda_runtime::{Error, LambdaEvent, run, service_fn};
 use anyhow::Context;
+use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use parser::utils::setup_tracing;
 use serde::{Deserialize, Serialize};
-use tracing::{info, error};
+use tracing::{error, info};
 
 use parser::models::Site;
-use parser::services::scraper::ScraperService;
 use parser::services::playwright_crawler::PlaywrightCrawlerService;
+use parser::services::scrapedo_crawler::ScrapedoCrawlerService;
+use parser::services::scraper::ScraperService;
 
 #[derive(Debug, Default, Deserialize)]
 #[serde(default)]
@@ -14,7 +15,6 @@ pub(crate) struct Request {
     pub service: Option<String>,
     pub sites: Vec<Site>,
 }
-
 
 #[derive(Serialize)]
 struct Response {
@@ -51,6 +51,15 @@ async fn function_handler(event: LambdaEvent<Request>) -> Result<Response, Error
                     .execute(&request.sites)
                     .await
                     .context("playwright execution")?;
+            }
+            "scrapedo" | "scrape.do" | "scrape-do" => {
+                let service = ScrapedoCrawlerService::new()
+                    .await
+                    .context("init scrape.do crawler service")?;
+                service
+                    .execute(&request.sites)
+                    .await
+                    .context("scrape.do execution")?;
             }
             "jordangonzalez" | _ => {
                 let service = ScraperService::new()

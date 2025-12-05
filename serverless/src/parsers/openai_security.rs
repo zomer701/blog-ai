@@ -4,7 +4,7 @@ use reqwest::Client;
 
 use crate::parsers::{parse_openai_article, parse_openai_listing, Parser};
 
-const SECURITY_URL: &str = "https://openai.com/news/security/";
+const SECURITY_URL: &str = "https://openai.com/news/security/?display=list";
 
 pub struct OpenAISecurityParser {
     client: Client,

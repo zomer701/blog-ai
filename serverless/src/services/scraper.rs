@@ -80,7 +80,11 @@ impl ScraperService {
         let mut processed = 0;
 
         for item in listing.iter().take(limit) {
-            info!("TAG:LISTING NAME {}: listing -> {}", parser.name(), item.url);
+            info!(
+                "TAG:LISTING NAME {}: listing -> {}",
+                parser.name(),
+                item.url
+            );
             let article = parser.parse_article(&item.url).await?;
             let images = article.images.join(", ");
             self.storage

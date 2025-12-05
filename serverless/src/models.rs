@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use chrono::Utc;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Debug, Clone, Deserialize)]
@@ -58,18 +58,18 @@ pub struct Translations {
 pub struct Translation {
     pub title: String,
     pub content: String,
-    pub edited: bool,  // Track if manually edited
+    pub edited: bool, // Track if manually edited
     pub edited_at: Option<i64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum ArticleStatus {
-    Pending,      // Scraped, awaiting review
-    Approved,     // Reviewed, ready to stage
-    Staged,       // Published to staging (preview)
-    Published,    // Live on production
-    Rejected,     // Rejected by admin
+    Pending,   // Scraped, awaiting review
+    Approved,  // Reviewed, ready to stage
+    Staged,    // Published to staging (preview)
+    Published, // Live on production
+    Rejected,  // Rejected by admin
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -80,7 +80,7 @@ pub struct PublishingMetadata {
     pub published_by: Option<String>,
     pub staging_url: Option<String>,
     pub production_url: Option<String>,
-    pub version: u32,  // Increments on each publish
+    pub version: u32, // Increments on each publish
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -118,7 +118,7 @@ impl Article {
     pub fn new(source: &str, source_url: &str, scraped: ScrapedArticle) -> Self {
         let word_count = scraped.content_text.split_whitespace().count();
         let reading_time = format!("{} min", word_count / 200);
-        
+
         Self {
             id: Uuid::new_v4().to_string(),
             source: source.to_string(),

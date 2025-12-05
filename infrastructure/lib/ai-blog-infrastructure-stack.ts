@@ -6,6 +6,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
+import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as path from 'path';
 
 export class AiBlogInfrastructureStack extends cdk.Stack {
@@ -61,6 +62,13 @@ export class AiBlogInfrastructureStack extends cdk.Stack {
     articlesTable.grantReadWriteData(lambdaExecutionRole);
     contentBucket.grantReadWrite(lambdaExecutionRole);
 
+    // Secret for scrape.do token (set the value after deployment).
+    const scrapedoTokenSecret = new secretsmanager.Secret(this, 'ScrapedoTokenSecret', {
+      secretName: 'scrapedo/token',
+      description: 'API token for scrape.do crawler',
+    });
+    scrapedoTokenSecret.grantRead(lambdaExecutionRole);
+
     // ========================================
     // Lambda Functions
     // ========================================
@@ -79,6 +87,7 @@ export class AiBlogInfrastructureStack extends cdk.Stack {
         TABLE_NAME: articlesTable.tableName,
         BUCKET_NAME: contentBucket.bucketName,
         RUST_LOG: 'debug',
+        SCRAPEDO_TOKEN_SECRET_ARN: scrapedoTokenSecret.secretArn,
       },
     });
 
@@ -119,5 +128,9 @@ export class AiBlogInfrastructureStack extends cdk.Stack {
       description: 'Scraper Lambda Function Name',
     });
 
+    new cdk.CfnOutput(this, 'ScrapedoTokenSecretArn', {
+      value: scrapedoTokenSecret.secretArn,
+      description: 'Secrets Manager ARN for scrape.do token (update value after deploy)',
+    });
   }
 }

@@ -113,6 +113,12 @@ CDK_DEFAULT_ACCOUNT=123456789012
    npm run deploy
    ```
 
+5. **Set scrape.do token secret**
+   ```bash
+   # After deploy, set the secret value created as scrapedo/token
+   aws secretsmanager put-secret-value --secret-id scrapedo/token --secret-string 'YOUR_SCRAPEDO_TOKEN'
+   ```
+
 ### Subsequent Deployments
 
 ```bash

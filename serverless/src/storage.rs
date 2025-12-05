@@ -87,8 +87,7 @@ pub struct Storage {
 impl Storage {
     pub async fn from_env() -> Result<Self> {
         let config = Config::from_env()?;
-        let aws_config =
-            aws_config::load_defaults(aws_config::BehaviorVersion::latest()).await;
+        let aws_config = aws_config::load_defaults(aws_config::BehaviorVersion::latest()).await;
         let dynamo = DynamoClient::new(&aws_config);
         let s3 = S3Client::new(&aws_config);
 
@@ -149,7 +148,6 @@ impl Storage {
 
         // self.upsert_article_metadata(&metadata).await
         Ok(())
-
     }
 
     async fn upsert_article_metadata(&self, metadata: &ArticleMetadataRecord) -> Result<()> {
