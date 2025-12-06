@@ -99,6 +99,17 @@ impl Storage {
         })
     }
 
+    pub async fn article_exists(
+        &self,
+        parser_name: &str,
+        title: &str,
+        category: &str,
+        date_text: &str,
+    ) -> Result<bool> {
+        let id = generate_id(parser_name, title, category, date_text);
+        self.metadata_exists(&id).await
+    }
+
     pub async fn save_article_content(
         &self,
         parser_name: &str,

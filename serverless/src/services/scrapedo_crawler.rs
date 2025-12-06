@@ -37,7 +37,7 @@ impl ScrapedoCrawlerService {
             };
 
             if let Some(limit) = site.top_articles {
-                let added = self.scrape_top_articles(limit, &parser).await?;
+                let added = self.scrape_top_articles(limit, site.force, &parser).await?;
                 results.new_articles += added;
             }
 
@@ -54,11 +54,31 @@ impl ScrapedoCrawlerService {
         Ok(results)
     }
 
-    async fn scrape_top_articles(&self, limit: usize, parser: &ScrapedoParser) -> Result<usize> {
+    async fn scrape_top_articles(
+        &self,
+        limit: usize,
+        force: bool,
+        parser: &ScrapedoParser,
+    ) -> Result<usize> {
         let listing = self.fetch_listing(parser).await?;
         let mut processed = 0;
 
         for item in listing.iter().take(limit) {
+            if !force
+                && self
+                    .storage
+                    .article_exists(parser.name(), &item.title, &item.category, &item.date_text)
+                    .await?
+            {
+                info!(
+                    "{}: skipping existing article \"{}\" ({})",
+                    parser.name(),
+                    item.title,
+                    item.url
+                );
+                continue;
+            }
+
             info!(
                 "TAG:SCRAPEDO_LISTING {}: {} -> {}",
                 parser.name(),

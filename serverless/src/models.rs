@@ -8,6 +8,8 @@ pub struct Site {
     pub top_articles: Option<usize>,
     #[serde(default)]
     pub articles: Vec<String>,
+    #[serde(default)]
+    pub force: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
