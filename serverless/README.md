@@ -53,6 +53,4 @@ Read more about deploying your lambda function in [the Cargo Lambda documentatio
 
 ## Scrape.do authentication
 
-- The Scrape.do crawler reads `SCRAPEDO_TOKEN` directly, or if absent, uses `SCRAPEDO_TOKEN_SECRET_ARN` to fetch the token from AWS Secrets Manager.
-- In CDK we create the secret `scrapedo/token` and expose its ARN to the Lambda; set its value after deploy:
-  `aws secretsmanager put-secret-value --secret-id scrapedo/token --secret-string 'YOUR_TOKEN'`
+- The Scrape.do crawler reads `SCRAPEDO_TOKEN` from the environment. Set this for local runs and in your Lambda configuration/deployment parameters.
