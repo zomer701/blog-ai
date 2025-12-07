@@ -3,9 +3,7 @@ use reqwest::Client;
 use tracing::{debug, info, warn};
 
 use crate::models::{ListingItem, ScrapeResults, Site};
-use crate::parsers::{
-    parse_openai_article_html, parse_openai_listing_html, parse_openai_news_list, OPENAI_BASE,
-};
+use crate::parsers::{parse_openai_article_html, parse_openai_news_list, OPENAI_BASE};
 use crate::storage::Storage;
 
 pub struct ScrapedoCrawlerService {
@@ -156,7 +154,29 @@ impl ScrapedoCrawlerService {
                     })
                     .collect()
             }
-            ScrapedoParser::OpenAISecurity => parse_openai_listing_html(&listing_html)?,
+            ScrapedoParser::OpenAISecurity => parse_openai_news_list(&listing_html, OPENAI_BASE)
+                .into_iter()
+                .map(|a| ListingItem {
+                    url: a.url,
+                    title: a.title,
+                    category: a.category,
+                    date_text: a.date_text,
+                })
+                .collect(),
+            ScrapedoParser::OpenAIResearch
+            | ScrapedoParser::OpenAICompanyAnnouncements
+            | ScrapedoParser::OpenAIEngineering
+            | ScrapedoParser::OpenAISafetyAlignment => {
+                parse_openai_news_list(&listing_html, OPENAI_BASE)
+                    .into_iter()
+                    .map(|a| ListingItem {
+                        url: a.url,
+                        title: a.title,
+                        category: a.category,
+                        date_text: a.date_text,
+                    })
+                    .collect()
+            }
         };
 
         Ok(items)
@@ -221,6 +241,10 @@ impl ScrapedoCrawler {
 enum ScrapedoParser {
     OpenAIProductReleases,
     OpenAISecurity,
+    OpenAIResearch,
+    OpenAICompanyAnnouncements,
+    OpenAIEngineering,
+    OpenAISafetyAlignment,
 }
 
 impl ScrapedoParser {
@@ -228,6 +252,10 @@ impl ScrapedoParser {
         match name {
             "openai-product-releases" => Some(Self::OpenAIProductReleases),
             "openai-security" => Some(Self::OpenAISecurity),
+            "openai-research" => Some(Self::OpenAIResearch),
+            "openai-company-announcements" => Some(Self::OpenAICompanyAnnouncements),
+            "openai-engineering" => Some(Self::OpenAIEngineering),
+            "openai-safety-alignment" => Some(Self::OpenAISafetyAlignment),
             _ => None,
         }
     }
@@ -236,6 +264,10 @@ impl ScrapedoParser {
         match self {
             ScrapedoParser::OpenAIProductReleases => "openai-product-releases",
             ScrapedoParser::OpenAISecurity => "openai-security",
+            ScrapedoParser::OpenAIResearch => "openai-research",
+            ScrapedoParser::OpenAICompanyAnnouncements => "openai-company-announcements",
+            ScrapedoParser::OpenAIEngineering => "openai-engineering",
+            ScrapedoParser::OpenAISafetyAlignment => "openai-safety-alignment",
         }
     }
 
@@ -245,6 +277,14 @@ impl ScrapedoParser {
                 crate::parsers::OPENAI_PRODUCT_RELEASES_LISTING
             }
             ScrapedoParser::OpenAISecurity => crate::parsers::OPENAI_SECURITY_LISTING,
+            ScrapedoParser::OpenAIResearch => crate::parsers::OPENAI_RESEARCH_LISTING,
+            ScrapedoParser::OpenAICompanyAnnouncements => {
+                crate::parsers::OPENAI_COMPANY_ANNOUNCEMENTS_LISTING
+            }
+            ScrapedoParser::OpenAIEngineering => crate::parsers::OPENAI_ENGINEERING_LISTING,
+            ScrapedoParser::OpenAISafetyAlignment => {
+                crate::parsers::OPENAI_SAFETY_ALIGNMENT_LISTING
+            }
         }
     }
 }

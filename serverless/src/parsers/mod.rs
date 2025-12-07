@@ -13,6 +13,13 @@ pub(crate) const OPENAI_BASE: &str = "https://openai.com";
 pub(crate) const OPENAI_PRODUCT_RELEASES_LISTING: &str =
     "https://openai.com/news/product-releases/?display=list";
 pub(crate) const OPENAI_SECURITY_LISTING: &str = "https://openai.com/news/security/?display=list";
+pub(crate) const OPENAI_RESEARCH_LISTING: &str = "https://openai.com/news/research/?display=list";
+pub(crate) const OPENAI_COMPANY_ANNOUNCEMENTS_LISTING: &str =
+    "https://openai.com/news/company-announcements/?display=list";
+pub(crate) const OPENAI_ENGINEERING_LISTING: &str =
+    "https://openai.com/news/engineering/?display=list";
+pub(crate) const OPENAI_SAFETY_ALIGNMENT_LISTING: &str =
+    "https://openai.com/news/safety-alignment/?display=list";
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Article {

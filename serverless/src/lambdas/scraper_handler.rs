@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use tracing::{error, info};
 
 use parser::models::Site;
+use parser::services::fallback_crawler::FallbackCrawlerService;
 use parser::services::playwright_crawler::PlaywrightCrawlerService;
 use parser::services::scrapedo_crawler::ScrapedoCrawlerService;
 use parser::services::scraper::ScraperService;
@@ -60,6 +61,15 @@ async fn function_handler(event: LambdaEvent<Request>) -> Result<Response, Error
                     .execute(&request.sites)
                     .await
                     .context("scrape.do execution")?;
+            }
+            "fallback" => {
+                let service = FallbackCrawlerService::new()
+                    .await
+                    .context("init fallback crawler service")?;
+                service
+                    .execute(&request.sites)
+                    .await
+                    .context("fallback execution")?;
             }
             "jordangonzalez" | _ => {
                 let service = ScraperService::new()

@@ -5,9 +5,7 @@ use serde::{Deserialize, Serialize};
 use tracing::{debug, info, warn};
 
 use crate::models::{ListingItem, ScrapeResults, Site};
-use crate::parsers::{
-    parse_openai_article_html, parse_openai_listing_html, parse_openai_news_list, OPENAI_BASE,
-};
+use crate::parsers::{parse_openai_article_html, parse_openai_news_list, OPENAI_BASE};
 use crate::storage::Storage;
 
 pub struct PlaywrightCrawlerService {
@@ -162,7 +160,29 @@ impl PlaywrightCrawlerService {
                     })
                     .collect()
             }
-            PlaywrightParser::OpenAISecurity => parse_openai_listing_html(&listing_html)?,
+            PlaywrightParser::OpenAISecurity => parse_openai_news_list(&listing_html, OPENAI_BASE)
+                .into_iter()
+                .map(|a| ListingItem {
+                    url: a.url,
+                    title: a.title,
+                    category: a.category,
+                    date_text: a.date_text,
+                })
+                .collect(),
+            PlaywrightParser::OpenAIResearch
+            | PlaywrightParser::OpenAICompanyAnnouncements
+            | PlaywrightParser::OpenAIEngineering
+            | PlaywrightParser::OpenAISafetyAlignment => {
+                parse_openai_news_list(&listing_html, OPENAI_BASE)
+                    .into_iter()
+                    .map(|a| ListingItem {
+                        url: a.url,
+                        title: a.title,
+                        category: a.category,
+                        date_text: a.date_text,
+                    })
+                    .collect()
+            }
         };
 
         Ok(items)
@@ -265,6 +285,10 @@ impl PlaywrightCrawler {
 enum PlaywrightParser {
     OpenAIProductReleases,
     OpenAISecurity,
+    OpenAIResearch,
+    OpenAICompanyAnnouncements,
+    OpenAIEngineering,
+    OpenAISafetyAlignment,
 }
 
 impl PlaywrightParser {
@@ -272,6 +296,10 @@ impl PlaywrightParser {
         match name {
             "openai-product-releases" => Some(Self::OpenAIProductReleases),
             "openai-security" => Some(Self::OpenAISecurity),
+            "openai-research" => Some(Self::OpenAIResearch),
+            "openai-company-announcements" => Some(Self::OpenAICompanyAnnouncements),
+            "openai-engineering" => Some(Self::OpenAIEngineering),
+            "openai-safety-alignment" => Some(Self::OpenAISafetyAlignment),
             _ => None,
         }
     }
@@ -280,6 +308,10 @@ impl PlaywrightParser {
         match self {
             PlaywrightParser::OpenAIProductReleases => "openai-product-releases",
             PlaywrightParser::OpenAISecurity => "openai-security",
+            PlaywrightParser::OpenAIResearch => "openai-research",
+            PlaywrightParser::OpenAICompanyAnnouncements => "openai-company-announcements",
+            PlaywrightParser::OpenAIEngineering => "openai-engineering",
+            PlaywrightParser::OpenAISafetyAlignment => "openai-safety-alignment",
         }
     }
 
@@ -289,6 +321,14 @@ impl PlaywrightParser {
                 crate::parsers::OPENAI_PRODUCT_RELEASES_LISTING
             }
             PlaywrightParser::OpenAISecurity => crate::parsers::OPENAI_SECURITY_LISTING,
+            PlaywrightParser::OpenAIResearch => crate::parsers::OPENAI_RESEARCH_LISTING,
+            PlaywrightParser::OpenAICompanyAnnouncements => {
+                crate::parsers::OPENAI_COMPANY_ANNOUNCEMENTS_LISTING
+            }
+            PlaywrightParser::OpenAIEngineering => crate::parsers::OPENAI_ENGINEERING_LISTING,
+            PlaywrightParser::OpenAISafetyAlignment => {
+                crate::parsers::OPENAI_SAFETY_ALIGNMENT_LISTING
+            }
         }
     }
 }

@@ -45,6 +45,15 @@ export class AiBlogInfrastructureStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.RETAIN,
     });
 
+    // Snapshot Bucket (private storage for fallback HTML)
+    const snapshotBucket = new s3.Bucket(this, 'SnapshotBucket', {
+      bucketName: `ai-blog-snapshots-${this.account}`,
+      versioned: false,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    });
+
     // ========================================
     // IAM Roles
     // ========================================
@@ -60,6 +69,7 @@ export class AiBlogInfrastructureStack extends cdk.Stack {
     // Grant permissions to Lambda role
     articlesTable.grantReadWriteData(lambdaExecutionRole);
     contentBucket.grantReadWrite(lambdaExecutionRole);
+    snapshotBucket.grantRead(lambdaExecutionRole);
 
     // ========================================
     // Lambda Functions
@@ -81,6 +91,7 @@ export class AiBlogInfrastructureStack extends cdk.Stack {
         RUST_LOG: 'debug',
         // Provide SCRAPEDO_TOKEN via environment/secrets at deploy time.
         SCRAPEDO_TOKEN: process.env.SCRAPEDO_TOKEN ?? '',
+        SNAPSHOT_BUCKET: snapshotBucket.bucketName,
       },
     });
 
@@ -114,6 +125,11 @@ export class AiBlogInfrastructureStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'ContentBucketName', {
       value: contentBucket.bucketName,
       description: 'S3 Content Bucket Name',
+    });
+
+    new cdk.CfnOutput(this, 'SnapshotBucketName', {
+      value: snapshotBucket.bucketName,
+      description: 'Private snapshot bucket for fallback crawler',
     });
 
     new cdk.CfnOutput(this, 'ScraperFunctionName', {
