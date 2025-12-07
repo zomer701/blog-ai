@@ -54,3 +54,23 @@ Read more about deploying your lambda function in [the Cargo Lambda documentatio
 ## Scrape.do authentication
 
 - The Scrape.do crawler reads `SCRAPEDO_TOKEN` from the environment. Set this for local runs and in your Lambda configuration/deployment parameters.
+
+## Provided articles metadata
+
+- For provided article URLs, you can include `category` and `date_text` at the site level to store those values even when the page doesn’t expose them:
+  ```json
+  {
+    "service": "scrapedo",
+    "sites": [
+      {
+        "name": "openai-product-releases",
+        "force": true,
+        "category": "Product",
+        "date_text": "Nov 24, 2025",
+        "articles": [
+          "https://openai.com/index/chatgpt-shopping-research/"
+        ]
+      }
+    ]
+  }
+  ```

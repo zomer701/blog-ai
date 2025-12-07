@@ -122,12 +122,15 @@ impl PlaywrightCrawlerService {
             );
             let article = self.parse_article(parser, url).await?;
 
+            let category = site.category.as_deref().unwrap_or("");
+            let date_text = site.date_text.as_deref().unwrap_or("");
+
             self.storage
                 .save_article_content(
                     parser.name(),
                     &article.title,
-                    "",
-                    "",
+                    category,
+                    date_text,
                     url,
                     &article.content_html,
                     &article.content_text,

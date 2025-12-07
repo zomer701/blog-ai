@@ -10,6 +10,10 @@ pub struct Site {
     pub articles: Vec<String>,
     #[serde(default)]
     pub force: bool,
+    #[serde(default)]
+    pub category: Option<String>,
+    #[serde(default)]
+    pub date_text: Option<String>,
     /// Optional precomputed listing entries (e.g., from an S3-hosted index.html) to process when a parser is unavailable.
     #[serde(default)]
     pub provided_listing: Vec<ProvidedListingItem>,
