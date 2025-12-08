@@ -52,7 +52,16 @@ export const TopNav = memo(function TopNav({
     <div className="sticky top-0 z-50 border-b border-black/5 bg-white/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <div className="flex flex-wrap items-center gap-3">
-          <Link href="/" prefetch={false} className="flex items-center gap-2">
+          <Link
+            href="/"
+            prefetch={false}
+            onClick={(e) => {
+              // Force hard navigation so the page fully refreshes
+              e.preventDefault();
+              window.location.assign('/');
+            }}
+            className="flex items-center gap-2"
+          >
             <img
               src="/icon.png"
               alt="GenAI Agent News"

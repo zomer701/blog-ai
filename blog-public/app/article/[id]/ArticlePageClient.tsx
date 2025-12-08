@@ -244,6 +244,11 @@ export function ArticlePageClient({ id, searchParamsLang }: Props) {
               href="/"
               prefetch={false}
               aria-label="Home"
+              onClick={(e) => {
+                // Force hard navigation so the page fully refreshes
+                e.preventDefault();
+                window.location.assign('/');
+              }}
               className="flex items-center gap-2"
             >
               <img
