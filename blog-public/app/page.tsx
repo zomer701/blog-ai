@@ -40,6 +40,7 @@ export default function Home() {
   const [language, setLanguage] = useState<Language>('en');
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [page, setPage] = useState(0);
+  const [dynamicTag, setDynamicTag] = useState<string | null>(null);
 
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -75,8 +76,19 @@ export default function Home() {
     return [
       { id: 'all', label: 'All stories', count: articles.length },
       ...topSources,
+      ...(dynamicTag
+        ? [
+            {
+              id: dynamicTag,
+              label: dynamicTag.startsWith('#') ? dynamicTag : dynamicTag,
+              count: articles.filter((a) =>
+                a.metadata.tags.includes(dynamicTag)
+              ).length,
+            },
+          ]
+        : []),
     ];
-  }, [articles]);
+  }, [articles, dynamicTag]);
 
   const filtered = useMemo(() => {
     if (activeCategory === 'all') return articles;
@@ -115,6 +127,9 @@ export default function Home() {
         activeCategory={activeCategory}
         onCategoryChange={(id) => {
           setActiveCategory(id);
+          if (['openai', 'anthropic', 'arxiv', 'all'].includes(id.toLowerCase())) {
+            setDynamicTag(null);
+          }
           setPage(0);
         }}
         language={language}
@@ -141,6 +156,11 @@ export default function Home() {
               article={article}
               language={language}
               onSwipe={(direction) => handleSwipe(direction, index)}
+              onTagSelect={(tag) => {
+                setDynamicTag(tag);
+                setActiveCategory(tag);
+                setPage(0);
+              }}
             />
           ))}
         </div>

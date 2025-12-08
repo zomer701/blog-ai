@@ -12,6 +12,7 @@ type ArticleCardProps = {
   language: Language;
   onSwipe?: (direction: 'up' | 'down') => void;
   className?: string;
+  onTagSelect?: (tag: string) => void;
 };
 
 function tagClass(tag: string) {
@@ -59,7 +60,10 @@ function getTranslatedBody(article: Article, language: Language) {
 }
 
 export const ArticleCard = forwardRef<HTMLDivElement, ArticleCardProps>(
-  function ArticleCard({ article, language, onSwipe, className }, ref) {
+  function ArticleCard(
+    { article, language, onSwipe, onTagSelect, className },
+    ref
+  ) {
     const touchStartY = useRef<number | null>(null);
 
     const media = article.content.images?.[0];
@@ -151,12 +155,14 @@ export const ArticleCard = forwardRef<HTMLDivElement, ArticleCardProps>(
               {article.author}
             </span>
             {article.metadata.tags.slice(0, 3).map((tag) => (
-              <span
+              <button
                 key={tag}
-                className={`blog-tag text-xs font-semibold ${tagClass(tag)}`}
+                type="button"
+                onClick={() => onTagSelect?.(tag)}
+                className={`blog-tag text-xs font-semibold ${tagClass(tag)} transition hover:brightness-95`}
               >
-                #{tag}
-              </span>
+                {tag.startsWith('#') ? tag : `#${tag}`}
+              </button>
             ))}
           </div>
           <Link
