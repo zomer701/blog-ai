@@ -4,28 +4,28 @@ export const sampleArticles: Article[] = [
   {
     id: 'sample-openai-o1',
     source: 'OpenAI',
-    source_url: 'https://openai.com/index/introducing-openai-o1/',
-    title: 'OpenAI launches O1 models to boost reasoning and reliability',
+    source_url: 'https://openai.com/index/how-confessions-can-keep-language-models-honest/',
+    title: 'How “confessions” can keep language models honest',
     author: 'OpenAI Research',
-    published_date: '2024-09-12T08:00:00Z',
+    published_date: '2024-12-03T08:00:00Z',
     scraped_at: Date.now(),
     status: 'published',
     content: {
       original_html: '',
-      text: 'OpenAI introduced the O1 model family focused on step-by-step reasoning, fewer refusals, and stronger tool use. The launch adds a faster O1-mini, improved safety defaults, and early access to native reasoning traces for enterprise customers.',
+      text: 'OpenAI describes a new technique where models are prompted to “confess” their internal reasoning, reducing hallucinations and making outputs more auditable. The approach explores transparency prompts and calibration to keep models honest on factual tasks.',
       images: ['https://images.unsplash.com/photo-1527443224154-d3033dc0bac0?auto=format&fit=crop&w=1200&q=80'],
     },
     translations: {
       es: {
-        title: 'OpenAI lanza la familia O1 para mejorar el razonamiento',
+        title: 'Cómo las “confesiones” pueden mantener honestos a los modelos',
         content:
-          'OpenAI presentó la familia O1 enfocada en razonamiento paso a paso, menos rechazos y mejor uso de herramientas. Incluye O1-mini más rápido, nuevas protecciones y trazas de razonamiento para clientes enterprise.',
+          'OpenAI explora pedirle a los modelos que “confiesen” su razonamiento interno para reducir alucinaciones y mejorar la auditabilidad. El enfoque usa prompts de transparencia y calibración para mantener respuestas factuals.',
         edited: false,
       },
       uk: {
-        title: 'OpenAI запускає модельну лінійку O1 для кращого мислення',
+        title: 'Як “зізнання” допомагають зберегти чесність мовних моделей',
         content:
-          'OpenAI представила серію O1 з фокусом на покрокове міркування, менше відмов і кращу роботу з інструментами. Додано швидшу O1-mini, більше безпеки та трасування міркувань для enterprise.',
+          'OpenAI описує техніку, де моделі просять “зізнатися” у своєму міркуванні, що зменшує галюцинації та робить відповіді більш прозорими. Використовуються промпти прозорості й калібрування для кращої фактичності.',
         edited: false,
       },
     },
@@ -38,35 +38,35 @@ export const sampleArticles: Article[] = [
   {
     id: 'sample-anthropic',
     source: 'Anthropic',
-    source_url: 'https://example.com/anthropic/claude',
-    title: 'Anthropic debuts Claude workflows for long-running agents',
-    author: 'Nikhil Rao',
-    published_date: '2024-11-18T12:00:00Z',
+    source_url: 'https://www.anthropic.com/news/disrupting-AI-espionage',
+    title: 'Anthropic on disrupting AI espionage',
+    author: 'Anthropic Team',
+    published_date: '2024-12-02T12:00:00Z',
     scraped_at: Date.now(),
     status: 'published',
     content: {
       original_html: '',
-      text: 'Claude workflows string together multiple calls with safe-tooling to handle longer research and review tasks. Early testers report stronger auditability and fewer prompt collisions compared to classic chains.',
+      text: 'Anthropic details countermeasures against AI-enabled espionage, including monitoring for covert data exfiltration, adaptive controls, and red-teaming. The post outlines best practices for securing AI systems in sensitive environments.',
       images: ['https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1200&q=80'],
     },
     translations: {
       es: {
-        title: 'Anthropic lanza flujos Claude para agentes de larga duración',
+        title: 'Anthropic y la lucha contra el espionaje con IA',
         content:
-          'Claude ahora une múltiples llamadas con herramientas seguras para tareas más largas. Los primeros usuarios reportan mejor trazabilidad y menos colisiones de prompts frente a cadenas clásicas.',
+          'Anthropic describe medidas contra el espionaje asistido por IA: monitoreo de exfiltración, controles adaptativos y red teaming. Comparten prácticas para asegurar sistemas de IA en entornos sensibles.',
         edited: false,
       },
       uk: {
-        title: 'Anthropic представила Claude workflows для довгих задач',
+        title: 'Anthropic про протидію шпигунству з ШІ',
         content:
-          'Claude тепер поєднує кілька викликів із безпечними інструментами для тривалих завдань. Тестувальники бачать кращу аудитовність і менше конфліктів підказок порівняно з класичними ланцюжками.',
+          'Anthropic пояснює протидію шпигунству через ШІ: виявлення прихованої ексфільтрації, адаптивні контролі та red teaming. Наводять поради для захисту систем у чутливих середовищах.',
         edited: false,
       },
     },
     metadata: {
       word_count: 160,
       reading_time: '2 min read',
-      tags: ['Anthropic1', 'anthropic1', 'claude1', '#agents1'],
+      tags: ['Anthropic1', 'anthropic1', '#agents1'],
     },
   },
   {
