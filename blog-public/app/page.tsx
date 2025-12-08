@@ -91,20 +91,31 @@ export default function Home() {
   const categories: Category[] = useMemo(() => {
     if (!articles.length) return [];
 
-    const tagCounts = new Map<string, number>();
+    const normalizeTag = (value: string) => value.replace(/^#/, '').toLowerCase();
+
+    const tagCounts = new Map<string, { count: number; label: string }>();
     const sourceCounts = new Map<string, number>();
 
     articles.forEach((article) => {
       sourceCounts.set(article.source, (sourceCounts.get(article.source) || 0) + 1);
       article.metadata.tags.forEach((tag) => {
-        tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+        const key = normalizeTag(tag);
+        if (!tagCounts.has(key)) {
+          tagCounts.set(key, { count: 0, label: tag });
+        }
+        const current = tagCounts.get(key)!;
+        tagCounts.set(key, { count: current.count + 1, label: current.label });
       });
     });
 
     const topTags = [...tagCounts.entries()]
-      .sort((a, b) => b[1] - a[1])
+      .sort((a, b) => b[1].count - a[1].count)
       .slice(0, 6)
-      .map(([id, count]) => ({ id, label: `#${id}`, count }));
+      .map(([id, info]) => ({
+        id,
+        label: info.label.startsWith('#') ? info.label : info.label,
+        count: info.count,
+      }));
 
     const topSources = [...sourceCounts.entries()]
       .sort((a, b) => b[1] - a[1])

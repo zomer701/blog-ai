@@ -32,7 +32,7 @@ export const sampleArticles: Article[] = [
     metadata: {
       word_count: 180,
       reading_time: '2 min read',
-      tags: ['openai', 'o1', 'reasoning'],
+      tags: ['OpenAI1', 'openai1', '#o11', '#reasoning2'],
     },
   },
   {
@@ -66,7 +66,7 @@ export const sampleArticles: Article[] = [
     metadata: {
       word_count: 160,
       reading_time: '2 min read',
-      tags: ['anthropic', 'claude', 'agents'],
+      tags: ['Anthropic1', 'anthropic1', 'claude1', '#agents1'],
     },
   },
   {
@@ -100,7 +100,7 @@ export const sampleArticles: Article[] = [
     metadata: {
       word_count: 140,
       reading_time: '1 min read',
-      tags: ['arxiv', 'inference', 'reasoning'],
+      tags: ['arXiv1', 'arxiv1', '#reasoning2'],
     },
   },
 ];
