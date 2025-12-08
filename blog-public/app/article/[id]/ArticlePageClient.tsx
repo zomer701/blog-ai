@@ -240,7 +240,12 @@ export function ArticlePageClient({ id, searchParamsLang }: Props) {
       <header className="sticky top-0 z-30 border-b border-black/5 bg-white/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
           <div className="flex flex-wrap items-center gap-3">
-            <Link href="/" aria-label="Home" className="flex items-center gap-2">
+            <Link
+              href="/"
+              prefetch={false}
+              aria-label="Home"
+              className="flex items-center gap-2"
+            >
               <img
                 src="/icon.png"
                 alt="GenAI Agent News"
