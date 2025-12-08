@@ -1,6 +1,6 @@
 # Blog Public - Reader-Facing Website
 
-Next.js app for readers to browse and read AI/tech blog articles with multi-language support.
+Next.js app for readers to browse and read AI/tech blog articles with multi-language support. Ships with built-in sample data so you can see the UI without a backend.
 
 ## Features
 
@@ -13,7 +13,9 @@ Next.js app for readers to browse and read AI/tech blog articles with multi-lang
 - ✅ **Responsive** - Mobile-friendly design
 - ✅ **Fast** - Next.js with Tailwind CSS
 
-## Quick Start
+## Quick Start (with sample data)
+
+- No backend needed. Sample articles are served automatically if `NEXT_PUBLIC_API_URL` or `NEXT_PUBLIC_API_KEY` are missing.
 
 ### 1. Install Dependencies
 
@@ -21,25 +23,27 @@ Next.js app for readers to browse and read AI/tech blog articles with multi-lang
 npm install
 ```
 
-### 2. Configure Environment
-
-```bash
-cp .env.local.example .env.local
-```
-
-Edit `.env.local`:
-```bash
-NEXT_PUBLIC_API_URL=http://localhost:3001/api
-NEXT_PUBLIC_API_KEY=your-api-key-here
-```
-
-### 3. Run Development Server
+### 2. Run Development Server
 
 ```bash
 npm run dev
 ```
 
-Access at: http://localhost:3000
+Access at: http://localhost:3000 — the homepage shows a TikTok-style vertical feed using the sample articles.
+
+### Using a real API (optional)
+
+```bash
+cp .env.local.example .env.local
+```
+
+Set your API values:
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:3001/api
+NEXT_PUBLIC_API_KEY=your-api-key-here
+```
+
+When these are set, the app will call your API instead of sample data.
 
 ## Project Structure
 
@@ -53,7 +57,8 @@ blog-public/
 │   │       └── page.tsx    # Article detail page
 │   └── globals.css         # Global styles
 ├── lib/
-│   └── api.ts              # API client with auth
+│   ├── api.ts              # API client with auth + sample fallback
+│   └── sampleData.ts       # Sample articles shown when no API is configured
 ├── .env.local.example      # Environment template
 └── package.json
 ```
@@ -66,16 +71,16 @@ blog-public/
 import { api } from '@/lib/api';
 
 // Get all articles
-const articles = await api.getArticles();
+const articles = await api.getArticles(); // uses sample data if no API is set
 
 // Get single article
-const article = await api.getArticle(id);
+const article = await api.getArticle(id); // sample fallback if offline
 
 // Search articles
 const results = await api.searchArticles(query);
 
 // Track view (analytics)
-await api.trackView(articleId);
+await api.trackView(articleId); // no-op when using sample data
 ```
 
 ### Authentication

@@ -1,173 +1,229 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { api, Article } from '@/lib/api';
+import { ArticleCard } from '@/components/feed/ArticleCard';
+import { SkeletonCard } from '@/components/feed/SkeletonCard';
+import { TopNav, Category } from '@/components/feed/TopNav';
+
+const PAGE_SIZE = 15;
+
+type Language = 'en' | 'es' | 'uk';
+
+const LANGS: Language[] = ['en', 'es', 'uk'];
+
+const getPathLanguage = (): Language | null => {
+  if (typeof window === 'undefined') return null;
+  const parts = window.location.pathname.split('/').filter(Boolean);
+  const candidate = parts[0]?.toLowerCase();
+  return LANGS.includes(candidate as Language) ? (candidate as Language) : null;
+};
+
+const getCookieLanguage = (): Language | null => {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(/(?:^|; )preferred_lang=([^;]+)/);
+  const value = match ? decodeURIComponent(match[1]) : null;
+  return LANGS.includes(value as Language) ? (value as Language) : null;
+};
+
+const setCookieLanguage = (lang: Language) => {
+  if (typeof document === 'undefined') return;
+  const expires = new Date();
+  expires.setFullYear(expires.getFullYear() + 1);
+  document.cookie = `preferred_lang=${encodeURIComponent(
+    lang
+  )}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+};
 
 export default function Home() {
   const [articles, setArticles] = useState<Article[]>([]);
+  const [filtered, setFiltered] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [language, setLanguage] = useState<'en' | 'es' | 'uk'>('en');
+  const [language, setLanguage] = useState<Language>('en');
+  const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [page, setPage] = useState(0);
+
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    loadArticles();
+    const initialLang =
+      getPathLanguage() ?? getCookieLanguage() ?? ('en' as Language);
+    setLanguage(initialLang);
+    setCookieLanguage(initialLang);
+
+    const fetchArticles = async () => {
+      try {
+        setLoading(true);
+        const data = await api.getArticles();
+        setArticles(data);
+        setFiltered(data);
+        setError(null);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : 'Failed to load articles'
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticles();
   }, []);
 
-  const loadArticles = async () => {
-    try {
-      setLoading(true);
-      const data = await api.getArticles();
-      setArticles(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load articles');
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (activeCategory === 'all') {
+      setFiltered(articles);
+      setPage(0);
+      return;
     }
-  };
 
-  const getTitle = (article: Article) => {
-    if (language === 'en') return article.title;
-    if (language === 'es' && article.translations?.es) {
-      return article.translations.es.title;
-    }
-    if (language === 'uk' && article.translations?.uk) {
-      return article.translations.uk.title;
-    }
-    return article.title;
-  };
+    const filteredArticles = articles.filter((article) => {
+      const matchesTag = article.metadata.tags.includes(activeCategory);
+      const matchesSource = article.source === activeCategory;
+      return matchesTag || matchesSource;
+    });
 
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
+    setFiltered(filteredArticles);
+    setPage(0);
+  }, [activeCategory, articles]);
+
+  const categories: Category[] = useMemo(() => {
+    if (!articles.length) return [];
+
+    const tagCounts = new Map<string, number>();
+    const sourceCounts = new Map<string, number>();
+
+    articles.forEach((article) => {
+      sourceCounts.set(article.source, (sourceCounts.get(article.source) || 0) + 1);
+      article.metadata.tags.forEach((tag) => {
+        tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
       });
-    } catch {
-      return dateString;
+    });
+
+    const topTags = [...tagCounts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([id, count]) => ({ id, label: `#${id}`, count }));
+
+    const topSources = [...sourceCounts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([id, count]) => ({ id, label: id, count }));
+
+    return [
+      { id: 'all', label: 'All stories', count: articles.length },
+      ...topTags,
+      ...topSources,
+    ];
+  }, [articles]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages - 1);
+  const start = currentPage * PAGE_SIZE;
+  const end = start + PAGE_SIZE;
+  const visibleArticles = filtered.slice(start, end);
+
+  const handleSwipe = (direction: 'up' | 'down', currentIndex: number) => {
+    const targetIndex =
+      direction === 'up' ? currentIndex + 1 : Math.max(currentIndex - 1, 0);
+    const target = cardRefs.current[targetIndex];
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (direction === 'up' && currentPage < totalPages - 1) {
+      setPage((p) => Math.min(p + 1, totalPages - 1));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (direction === 'down' && currentPage > 0) {
+      setPage((p) => Math.max(p - 1, 0));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">
-              AI & Tech Blog
-            </h1>
-            
-            {/* Language Selector */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => setLanguage('en')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  language === 'en'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                English
-              </button>
-              <button
-                onClick={() => setLanguage('es')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  language === 'es'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                Español
-              </button>
-              <button
-                onClick={() => setLanguage('uk')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  language === 'uk'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                Українська
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-50 text-gray-900">
+      <TopNav
+        categories={categories}
+        activeCategory={activeCategory}
+        onCategoryChange={setActiveCategory}
+        language={language}
+        onLanguageChange={(lang) => {
+          setLanguage(lang);
+          setCookieLanguage(lang);
+        }}
+      />
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {loading && (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            <p className="mt-4 text-gray-600">Loading articles...</p>
-          </div>
-        )}
-
+      <main className="mx-auto max-w-6xl space-y-8 px-4 pb-20 pt-6 snap-y snap-mandatory overflow-y-auto max-h-[calc(100vh-88px)] sm:px-6 lg:max-h-none lg:overflow-visible lg:pt-10 lg:[scroll-snap-type:none]">
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-            <p className="font-medium">Error loading articles</p>
-            <p className="text-sm mt-1">{error}</p>
-            <button
-              onClick={loadArticles}
-              className="mt-3 text-sm font-medium text-red-600 hover:text-red-800"
-            >
-              Try again
-            </button>
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-red-800 shadow-sm dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-200">
+            <div className="text-sm font-semibold">Error loading feed</div>
+            <div className="text-sm">{error}</div>
           </div>
         )}
 
-        {!loading && !error && articles.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-600">No articles found</p>
-          </div>
-        )}
-
-        {!loading && !error && articles.length > 0 && (
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {articles.map((article) => (
-              <Link
-                key={article.id}
-                href={`/article/${article.id}?lang=${language}`}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
-              >
-                <div className="p-6">
-                  <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
-                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
-                      {article.source}
-                    </span>
-                    <span>•</span>
-                    <time>{formatDate(article.published_date)}</time>
-                  </div>
-                  
-                  <h2 className="text-xl font-semibold text-gray-900 mb-3 line-clamp-2">
-                    {getTitle(article)}
-                  </h2>
-                  
-                  <p className="text-gray-600 text-sm line-clamp-3 mb-4">
-                    {article.content.text.substring(0, 150)}...
-                  </p>
-                  
-                  <div className="flex items-center justify-between text-sm text-gray-500">
-                    <span>{article.author}</span>
-                    <span>{article.metadata.reading_time}</span>
-                  </div>
-                </div>
-              </Link>
+        {loading && (
+          <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <SkeletonCard key={index} />
             ))}
           </div>
         )}
-      </main>
 
-      {/* Footer */}
-      <footer className="bg-white border-t mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <p className="text-center text-gray-500 text-sm">
-            © {new Date().getFullYear()} AI & Tech Blog. All rights reserved.
-          </p>
+        {!loading && !error && visibleArticles.length === 0 && (
+          <div className="rounded-3xl border border-gray-200 bg-white p-8 text-center text-gray-600 shadow-sm dark:border-white/10 dark:bg-gray-900 dark:text-gray-300">
+            No stories found for this category.
+          </div>
+        )}
+
+        <div className="grid snap-y snap-mandatory gap-6 lg:grid-cols-2 lg:[scroll-snap-type:none] xl:grid-cols-3">
+          {visibleArticles.map((article, index) => (
+            <ArticleCard
+              key={article.id}
+              ref={(node) => {
+                cardRefs.current[index] = node;
+              }}
+              article={article}
+              language={language}
+              onSwipe={(direction) => handleSwipe(direction, index)}
+            />
+          ))}
         </div>
-      </footer>
+
+        {!loading && filtered.length > PAGE_SIZE && (
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <button
+              onClick={() => {
+                setPage((p) => Math.max(p - 1, 0));
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              disabled={currentPage === 0}
+              className={`rounded-full border px-3 py-1 text-sm font-semibold transition ${
+                currentPage === 0
+                  ? 'cursor-not-allowed border-gray-200 text-gray-400'
+                  : 'border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50'
+              }`}
+            >
+              ← Prev
+            </button>
+            <span className="text-sm font-semibold text-gray-600">
+              Page {currentPage + 1} of {totalPages}
+            </span>
+            <button
+              onClick={() => {
+                setPage((p) => Math.min(p + 1, totalPages - 1));
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              disabled={currentPage >= totalPages - 1}
+              className={`rounded-full border px-3 py-1 text-sm font-semibold transition ${
+                currentPage >= totalPages - 1
+                  ? 'cursor-not-allowed border-gray-200 text-gray-400'
+                  : 'border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50'
+              }`}
+            >
+              Next →
+            </button>
+          </div>
+        )}
+      </main>
     </div>
   );
 }

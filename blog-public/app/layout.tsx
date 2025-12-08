@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI & Tech Blog",
+  title: "GenAI Agent News",
   description: "Latest news and insights from AI and technology",
 };
 

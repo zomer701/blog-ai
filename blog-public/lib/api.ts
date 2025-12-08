@@ -2,8 +2,14 @@
  * API client with authentication
  */
 
+import { sampleArticles } from './sampleData';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
+
+const shouldUseSamples = () =>
+  !process.env.NEXT_PUBLIC_API_URL ||
+  (!process.env.NEXT_PUBLIC_API_KEY && API_URL.includes('localhost'));
 
 export interface Article {
   id: string;
@@ -50,6 +56,10 @@ class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
+    if (shouldUseSamples()) {
+      throw new Error('Using sample data; network request skipped');
+    }
+
     const url = `${this.baseUrl}${endpoint}`;
     
     const headers: HeadersInit = {
@@ -74,6 +84,7 @@ class ApiClient {
    * Get all published articles
    */
   async getArticles(): Promise<Article[]> {
+    if (shouldUseSamples()) return sampleArticles;
     return this.request<Article[]>('/articles');
   }
 
@@ -81,6 +92,11 @@ class ApiClient {
    * Get a single article by ID
    */
   async getArticle(id: string): Promise<Article> {
+    if (shouldUseSamples()) {
+      return (
+        sampleArticles.find((article) => article.id === id) ?? sampleArticles[0]
+      );
+    }
     return this.request<Article>(`/articles/${id}`);
   }
 
@@ -88,6 +104,17 @@ class ApiClient {
    * Search articles
    */
   async searchArticles(query: string): Promise<Article[]> {
+    if (shouldUseSamples()) {
+      const q = query.toLowerCase();
+      return sampleArticles.filter(
+        (article) =>
+          article.title.toLowerCase().includes(q) ||
+          article.content.text.toLowerCase().includes(q) ||
+          article.metadata.tags.some((tag) =>
+            tag.toLowerCase().includes(q)
+          )
+      );
+    }
     return this.request<Article[]>(`/search?q=${encodeURIComponent(query)}`);
   }
 
@@ -95,6 +122,7 @@ class ApiClient {
    * Track article view (analytics)
    */
   async trackView(articleId: string): Promise<void> {
+    if (shouldUseSamples()) return;
     try {
       await this.request('/analytics/track', {
         method: 'POST',
@@ -105,7 +133,6 @@ class ApiClient {
         }),
       });
     } catch (error) {
-      // Don't fail if analytics tracking fails
       console.error('Failed to track view:', error);
     }
   }

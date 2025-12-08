@@ -54,6 +54,18 @@ export class AiBlogInfrastructureStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.RETAIN,
     });
 
+    // Public Site Bucket (static blog pages)
+    const publicSiteBucket = new s3.Bucket(this, 'PublicSiteBucket', {
+      bucketName: `ai-blog-public-${this.account}`,
+      versioned: true,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ACLS,
+      publicReadAccess: true,
+      websiteIndexDocument: 'index.html',
+      websiteErrorDocument: '404.html',
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    });
+
     // ========================================
     // IAM Roles
     // ========================================
@@ -70,6 +82,7 @@ export class AiBlogInfrastructureStack extends cdk.Stack {
     articlesTable.grantReadWriteData(lambdaExecutionRole);
     contentBucket.grantReadWrite(lambdaExecutionRole);
     snapshotBucket.grantRead(lambdaExecutionRole);
+    publicSiteBucket.grantReadWrite(lambdaExecutionRole);
 
     // ========================================
     // Lambda Functions
@@ -95,23 +108,21 @@ export class AiBlogInfrastructureStack extends cdk.Stack {
       },
     });
 
-    // ========================================
-    // EC2 Playwright Crawler (disabled)
-    // ========================================
-    // The original EC2 crawler plan is intentionally commented out. To re-enable,
-    // add the VPC/ECR/EC2 setup here and expose its URL via an output, then point
-    // Lambda to it with PLAYWRIGHT_CRAWLER_URL.
-
-    // ========================================
-    // EventBridge Rule for Scheduled Scraping
-    // ========================================
-//
-//     const scraperRule = new events.Rule(this, 'ScraperScheduleRule', {
-//       schedule: events.Schedule.rate(cdk.Duration.hours(1)),
-//       description: 'Trigger scraper every hour',
-//     });
-//
-//     scraperRule.addTarget(new targets.LambdaFunction(scraperLambda));
+    // Publisher Lambda Function (stub to update static site bucket)
+    const publisherLambda = new lambda.Function(this, 'PublisherFunction', {
+      functionName: 'ai-blog-site-publisher',
+      runtime: lambda.Runtime.PROVIDED_AL2,
+      architecture: lambda.Architecture.ARM_64,
+      handler: 'bootstrap',
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../serverless/target/lambda/site_publisher')),
+      role: lambdaExecutionRole,
+      timeout: cdk.Duration.minutes(5),
+      memorySize: 256,
+      environment: {
+        PUBLIC_SITE_BUCKET: publicSiteBucket.bucketName,
+        RUST_LOG: 'info',
+      },
+    });
 
     // ========================================
     // Outputs
@@ -132,10 +143,27 @@ export class AiBlogInfrastructureStack extends cdk.Stack {
       description: 'Private snapshot bucket for fallback crawler',
     });
 
+    new cdk.CfnOutput(this, 'PublicSiteBucketName', {
+      value: publicSiteBucket.bucketName,
+      description: 'S3 bucket for static blog pages (public site)',
+    });
+    new cdk.CfnOutput(this, 'PublicSiteBucketWebsiteURL', {
+      value: publicSiteBucket.bucketWebsiteUrl,
+      description: 'S3 static website endpoint (point Cloudflare to this origin)',
+    });
+    new cdk.CfnOutput(this, 'PublicSiteBucketRegionalDomain', {
+      value: publicSiteBucket.bucketRegionalDomainName,
+      description: 'Regional domain name for Cloudflare custom origin',
+    });
+
     new cdk.CfnOutput(this, 'ScraperFunctionName', {
       value: scraperLambda.functionName,
       description: 'Scraper Lambda Function Name',
     });
 
+    new cdk.CfnOutput(this, 'PublisherFunctionName', {
+      value: publisherLambda.functionName,
+      description: 'Publisher Lambda Function Name',
+    });
   }
 }
