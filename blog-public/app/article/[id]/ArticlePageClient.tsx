@@ -318,8 +318,6 @@ export function ArticlePageClient({ id, searchParamsLang }: Props) {
                 <span className="rounded-full bg-white/15 px-3 py-1">{article.source}</span>
                 <span className="h-1 w-1 rounded-full bg-white/50" />
                 <time>{formatDate(article.published_date)}</time>
-                <span className="h-1 w-1 rounded-full bg-white/50" />
-                <span>{article.metadata.reading_time}</span>
               </div>
               <h1 className="max-w-4xl text-3xl font-semibold leading-tight text-white sm:text-4xl">
                 {getTitle(article)}

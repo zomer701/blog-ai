@@ -1,0 +1,36 @@
+{
+  "id": "sample-arxiv",
+  "source": "arXiv",
+  "source_url": "https://arxiv.org/abs/2407.09252",
+  "title": "ArXiv: Inference-time scaling wins against bigger LMs",
+  "author": "Artemij Kuprijanov et al.",
+  "published_date": "2024-07-15T07:00:00Z",
+  "scraped_at": 1733203200000,
+  "status": "published",
+  "content": {
+    "original_html": "",
+    "text": "A recent arXiv paper benchmarks inference-time scaling\u2014multiple sampled trajectories with lightweight reranking\u2014and shows it outperforming single-pass reasoning from larger LMs on math and coding tasks. The authors highlight that compute spent at inference can beat parameter count.",
+    "images": [
+      "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80"
+    ]
+  },
+  "translations": {
+    "es": {
+      "title": "Paper en arXiv: el escalado en inferencia supera a LMs m\u00e1s grandes",
+      "content": "Un paper reciente muestra que el escalado en tiempo de inferencia\u2014trayectorias m\u00faltiples con reranking ligero\u2014supera el razonamiento de un solo paso de LMs grandes en tareas de matem\u00e1ticas y c\u00f3digo. M\u00e1s computo en inferencia puede ganar a m\u00e1s par\u00e1metros.",
+      "edited": false
+    },
+    "uk": {
+      "title": "\u041d\u043e\u0432\u0438\u0439 \u043f\u0440\u0435\u043f\u0440\u0438\u043d\u0442: \u043c\u0430\u0441\u0448\u0442\u0430\u0431\u0443\u0432\u0430\u043d\u043d\u044f \u043d\u0430 \u0456\u043d\u0444\u0435\u0440\u0435\u043d\u0441\u0456 \u0432\u0438\u043f\u0435\u0440\u0435\u0434\u0436\u0430\u0454 \u0431\u0456\u043b\u044c\u0448\u0456 \u043c\u043e\u0434\u0435\u043b\u0456",
+      "content": "\u0414\u043e\u0441\u043b\u0456\u0434\u0436\u0435\u043d\u043d\u044f \u043f\u043e\u043a\u0430\u0437\u0443\u0454, \u0449\u043e \u0431\u0430\u0433\u0430\u0442\u043e\u0440\u0430\u0437\u043e\u0432\u0435 \u0441\u0435\u043c\u043f\u043b\u0443\u0432\u0430\u043d\u043d\u044f \u0437 \u043b\u0435\u0433\u043a\u0438\u043c reranking \u043d\u0430 \u0456\u043d\u0444\u0435\u0440\u0435\u043d\u0441\u0456 \u043f\u0435\u0440\u0435\u0432\u0435\u0440\u0448\u0443\u0454 \u043e\u0434\u043d\u043e\u0440\u0430\u0437\u043e\u0432\u0435 \u043c\u0456\u0440\u043a\u0443\u0432\u0430\u043d\u043d\u044f \u0432\u0435\u043b\u0438\u043a\u0438\u0445 \u043c\u043e\u0434\u0435\u043b\u0435\u0439 \u0443 \u043c\u0430\u0442\u0435\u043c\u0430\u0442\u0438\u0446\u0456 \u0442\u0430 \u043a\u043e\u0434\u0456. \u041e\u0431\u0447\u0438\u0441\u043b\u0435\u043d\u043d\u044f \u043f\u0456\u0434 \u0447\u0430\u0441 \u0432\u0456\u0434\u043f\u043e\u0432\u0456\u0434\u0456 \u043c\u043e\u0436\u0443\u0442\u044c \u0431\u0443\u0442\u0438 \u043a\u043e\u0440\u0438\u0441\u043d\u0456\u0448\u0456 \u0437\u0430 \u043a\u0456\u043b\u044c\u043a\u0456\u0441\u0442\u044c \u043f\u0430\u0440\u0430\u043c\u0435\u0442\u0440\u0456\u0432.",
+      "edited": false
+    }
+  },
+  "metadata": {
+    "tags": [
+      "arXiv1",
+      "arxiv1",
+      "#reasoning2"
+    ]
+  }
+}

@@ -2,14 +2,26 @@
  * API client with authentication
  */
 
-import { sampleArticles } from './sampleData';
+import { Articles } from './storageData';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
+const S3_BASE =
+  process.env.NEXT_PUBLIC_ARTICLE_BASE_URL || '/articles'; // served from public/articles
 
 const shouldUseSamples = () =>
   !process.env.NEXT_PUBLIC_API_URL ||
   (!process.env.NEXT_PUBLIC_API_KEY && API_URL.includes('localhost'));
+
+const shouldUseS3 = () => Boolean(S3_BASE);
+
+async function fetchJson<T>(url: string): Promise<T> {
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
+  }
+  return res.json() as Promise<T>;
+}
 
 export interface Article {
   id: string;
@@ -30,8 +42,8 @@ export interface Article {
     uk: Translation;
   };
   metadata: {
-    word_count: number;
-    reading_time: string;
+    word_count?: number;
+    reading_time?: string;
     tags: string[];
   };
 }
@@ -84,7 +96,14 @@ class ApiClient {
    * Get all published articles
    */
   async getArticles(): Promise<Article[]> {
-    if (shouldUseSamples()) return sampleArticles;
+    if (shouldUseS3()) {
+      try {
+        return await fetchJson<Article[]>(`${S3_BASE}/index.json`);
+      } catch (err) {
+        console.warn('Falling back to local Articles because S3 index failed', err);
+      }
+    }
+    if (shouldUseSamples()) return Articles;
     return this.request<Article[]>('/articles');
   }
 
@@ -92,10 +111,15 @@ class ApiClient {
    * Get a single article by ID
    */
   async getArticle(id: string): Promise<Article> {
+    if (shouldUseS3()) {
+      try {
+        return await fetchJson<Article>(`${S3_BASE}/${id}.json`);
+      } catch (err) {
+        console.warn('Falling back to local Articles because S3 article fetch failed', err);
+      }
+    }
     if (shouldUseSamples()) {
-      return (
-        sampleArticles.find((article) => article.id === id) ?? sampleArticles[0]
-      );
+      return Articles.find((article) => article.id === id) ?? Articles[0];
     }
     return this.request<Article>(`/articles/${id}`);
   }
@@ -106,7 +130,7 @@ class ApiClient {
   async searchArticles(query: string): Promise<Article[]> {
     if (shouldUseSamples()) {
       const q = query.toLowerCase();
-      return sampleArticles.filter(
+      return Articles.filter(
         (article) =>
           article.title.toLowerCase().includes(q) ||
           article.content.text.toLowerCase().includes(q) ||

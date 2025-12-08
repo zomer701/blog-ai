@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { api, Article } from '@/lib/api';
-import { ArticleCard } from '@/components/feed/ArticleCard';
-import { SkeletonCard } from '@/components/feed/SkeletonCard';
-import { TopNav, Category } from '@/components/feed/TopNav';
+import type { Article } from '@/lib/api';
+import { ArticleCard } from '../components/feed/ArticleCard';
+import { TopNav, Category } from '../components/feed/TopNav';
+import { Articles } from '../lib/storageData';
 
 const PAGE_SIZE = 15;
 
@@ -36,10 +36,7 @@ const setCookieLanguage = (lang: Language) => {
 };
 
 export default function Home() {
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [filtered, setFiltered] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const articles: Article[] = Articles;
   const [language, setLanguage] = useState<Language>('en');
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [page, setPage] = useState(0);
@@ -49,44 +46,15 @@ export default function Home() {
   useEffect(() => {
     const initialLang =
       getPathLanguage() ?? getCookieLanguage() ?? ('en' as Language);
-    setLanguage(initialLang);
-    setCookieLanguage(initialLang);
-
-    const fetchArticles = async () => {
-      try {
-        setLoading(true);
-        const data = await api.getArticles();
-        setArticles(data);
-        setFiltered(data);
-        setError(null);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : 'Failed to load articles'
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArticles();
-  }, []);
-
-  useEffect(() => {
-    if (activeCategory === 'all') {
-      setFiltered(articles);
-      setPage(0);
-      return;
+    if (initialLang !== language) {
+      setLanguage(initialLang);
+      setCookieLanguage(initialLang);
+    } else {
+      setCookieLanguage(initialLang);
     }
-
-    const filteredArticles = articles.filter((article) => {
-      const matchesTag = article.metadata.tags.includes(activeCategory);
-      const matchesSource = article.source === activeCategory;
-      return matchesTag || matchesSource;
-    });
-
-    setFiltered(filteredArticles);
-    setPage(0);
-  }, [activeCategory, articles]);
+    // run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const categories: Category[] = useMemo(() => {
     if (!articles.length) return [];
@@ -129,6 +97,15 @@ export default function Home() {
     ];
   }, [articles]);
 
+  const filtered = useMemo(() => {
+    if (activeCategory === 'all') return articles;
+    return articles.filter((article) => {
+      const matchesTag = article.metadata.tags.includes(activeCategory);
+      const matchesSource = article.source === activeCategory;
+      return matchesTag || matchesSource;
+    });
+  }, [activeCategory, articles]);
+
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages - 1);
   const start = currentPage * PAGE_SIZE;
@@ -155,7 +132,10 @@ export default function Home() {
       <TopNav
         categories={categories}
         activeCategory={activeCategory}
-        onCategoryChange={setActiveCategory}
+        onCategoryChange={(id) => {
+          setActiveCategory(id);
+          setPage(0);
+        }}
         language={language}
         onLanguageChange={(lang) => {
           setLanguage(lang);
@@ -164,22 +144,7 @@ export default function Home() {
       />
 
       <main className="mx-auto max-w-6xl space-y-8 px-4 pb-20 pt-6 snap-y snap-mandatory overflow-y-auto max-h-[calc(100vh-88px)] sm:px-6 lg:max-h-none lg:overflow-visible lg:pt-10 lg:[scroll-snap-type:none]">
-        {error && (
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-red-800 shadow-sm dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-200">
-            <div className="text-sm font-semibold">Error loading feed</div>
-            <div className="text-sm">{error}</div>
-          </div>
-        )}
-
-        {loading && (
-          <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <SkeletonCard key={index} />
-            ))}
-          </div>
-        )}
-
-        {!loading && !error && visibleArticles.length === 0 && (
+        {visibleArticles.length === 0 && (
           <div className="rounded-3xl border border-gray-200 bg-white p-8 text-center text-gray-600 shadow-sm dark:border-white/10 dark:bg-gray-900 dark:text-gray-300">
             No stories found for this category.
           </div>
@@ -199,7 +164,7 @@ export default function Home() {
           ))}
         </div>
 
-        {!loading && filtered.length > PAGE_SIZE && (
+        {filtered.length > PAGE_SIZE && (
           <div className="flex flex-wrap items-center justify-center gap-3">
             <button
               onClick={() => {

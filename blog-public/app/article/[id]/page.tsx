@@ -1,4 +1,4 @@
-import { sampleArticles } from '@/lib/sampleData';
+import { Articles } from '../../../lib/storageData';
 import { ArticlePageClient } from './ArticlePageClient';
 
 type PageProps = {
@@ -11,7 +11,7 @@ export default async function Page({ params }: PageProps) {
 }
 
 export function generateStaticParams() {
-  return sampleArticles.map((article) => ({
+  return Articles.map((article) => ({
     id: article.id,
   }));
 }

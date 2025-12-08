@@ -133,8 +133,6 @@ export const ArticleCard = forwardRef<HTMLDivElement, ArticleCardProps>(
               </span>
               <span className="h-1 w-1 rounded-full bg-white/50" />
               <time>{formatDate(article.published_date)}</time>
-              <span className="h-1 w-1 rounded-full bg-white/50" />
-              <span>{article.metadata.reading_time}</span>
             </div>
             <h2 className="text-2xl font-semibold leading-tight text-white sm:text-3xl">
               {getTranslatedTitle(article, language)}
