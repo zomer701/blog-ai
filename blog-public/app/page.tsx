@@ -59,40 +59,21 @@ export default function Home() {
   const categories: Category[] = useMemo(() => {
     if (!articles.length) return [];
 
-    const normalizeTag = (value: string) => value.replace(/^#/, '').toLowerCase();
-
-    const tagCounts = new Map<string, { count: number; label: string }>();
     const sourceCounts = new Map<string, number>();
+    const allowedSources = new Set(['openai', 'anthropic', 'arxiv']);
 
     articles.forEach((article) => {
+      const key = article.source.toLowerCase();
+      if (!allowedSources.has(key)) return;
       sourceCounts.set(article.source, (sourceCounts.get(article.source) || 0) + 1);
-      article.metadata.tags.forEach((tag) => {
-        const key = normalizeTag(tag);
-        if (!tagCounts.has(key)) {
-          tagCounts.set(key, { count: 0, label: tag });
-        }
-        const current = tagCounts.get(key)!;
-        tagCounts.set(key, { count: current.count + 1, label: current.label });
-      });
     });
-
-    const topTags = [...tagCounts.entries()]
-      .sort((a, b) => b[1].count - a[1].count)
-      .slice(0, 6)
-      .map(([id, info]) => ({
-        id,
-        label: info.label.startsWith('#') ? info.label : info.label,
-        count: info.count,
-      }));
 
     const topSources = [...sourceCounts.entries()]
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 3)
       .map(([id, count]) => ({ id, label: id, count }));
 
     return [
       { id: 'all', label: 'All stories', count: articles.length },
-      ...topTags,
       ...topSources,
     ];
   }, [articles]);
