@@ -2,11 +2,16 @@ use anyhow::{Context, Result};
 use async_trait::async_trait;
 use reqwest::Client;
 use scraper::{ElementRef, Html, Selector};
+use tracing::{info, warn};
 
 use crate::models::{ListingItem, ScrapedArticle};
 use serde::Serialize;
 
+pub mod openai_company_announcements;
+pub mod openai_engineering;
 pub mod openai_product_releases;
+pub mod openai_research;
+pub mod openai_safety_alignment;
 pub mod openai_security;
 
 pub(crate) const OPENAI_BASE: &str = "https://openai.com";
@@ -117,48 +122,43 @@ pub fn parse_openai_news_list(html: &str, base_url: &str) -> Vec<Article> {
     out
 }
 
-pub(crate) async fn parse_openai_listing(
+/// Fetch and parse an OpenAI news listing page, logging structured output.
+pub(crate) async fn fetch_openai_news_listing(
     client: &Client,
     listing_url: &str,
-    _parser_name: &str,
+    parser_name: &str,
 ) -> Result<Vec<ListingItem>> {
     let html = client.get(listing_url).send().await?.text().await?;
-    parse_openai_listing_html(&html)
-}
+    let articles = parse_openai_news_list(&html, OPENAI_BASE);
 
-pub(crate) fn parse_openai_listing_html(html: &str) -> Result<Vec<ListingItem>> {
-    let document = Html::parse_document(html);
-
-    let link_selector = Selector::parse("a[href^=\"/news/\"]").unwrap();
-    let title_selector = Selector::parse("h3, h2, .text-base, .text-lg").unwrap();
-
-    let mut items = Vec::new();
-
-    for link in document.select(&link_selector) {
-        if let Some(href) = link.value().attr("href") {
-            let url = absolute_url(OPENAI_BASE, href);
-            let title = link
-                .select(&title_selector)
-                .next()
-                .map(|t| t.text().collect::<String>())
-                .filter(|t| !t.trim().is_empty())
-                .unwrap_or_else(|| link.text().collect::<String>());
-
-            let title = title.trim().to_string();
-            if title.is_empty() {
-                continue;
-            }
-
-            items.push(ListingItem {
-                url,
-                title,
-                category: String::new(),
-                date_text: String::new(),
-            });
-        }
+    if articles.is_empty() {
+        warn!(
+            "TAG:OPENAI_LISTING_EMPTY parser={} url={}",
+            parser_name, listing_url
+        );
     }
 
-    Ok(items)
+    for article in &articles {
+        info!(
+            "TAG:OPENAI_LISTING parser=\"{}\" category=\"{}\" date=\"{}\" title=\"{}\" summary=\"{}\" url={}",
+            parser_name,
+            article.category,
+            article.date_text,
+            article.title,
+            article.summary,
+            article.url,
+        );
+    }
+
+    Ok(articles
+        .into_iter()
+        .map(|a| ListingItem {
+            url: a.url,
+            title: a.title,
+            category: a.category,
+            date_text: a.date_text,
+        })
+        .collect())
 }
 
 pub(crate) async fn parse_openai_article(

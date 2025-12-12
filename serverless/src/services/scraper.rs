@@ -2,7 +2,11 @@ use anyhow::Result;
 use tracing::{debug, info, warn};
 
 use crate::models::{ScrapeResults, Site};
+use crate::parsers::openai_company_announcements::OpenAICompanyAnnouncementsParser;
+use crate::parsers::openai_engineering::OpenAIEngineeringParser;
 use crate::parsers::openai_product_releases::OpenAIProductReleasesParser;
+use crate::parsers::openai_research::OpenAIResearchParser;
+use crate::parsers::openai_safety_alignment::OpenAISafetyAlignmentParser;
 use crate::parsers::openai_security::OpenAISecurityParser;
 use crate::parsers::Parser;
 use crate::storage::Storage;
@@ -57,6 +61,12 @@ impl ScraperService {
     fn parser_for_site(&self, name: &str) -> Option<Box<dyn Parser>> {
         match name {
             "openai-product-releases" => Some(Box::new(OpenAIProductReleasesParser::new())),
+            "openai-company-announcements" => {
+                Some(Box::new(OpenAICompanyAnnouncementsParser::new()))
+            }
+            "openai-research" => Some(Box::new(OpenAIResearchParser::new())),
+            "openai-engineering" => Some(Box::new(OpenAIEngineeringParser::new())),
+            "openai-safety-alignment" => Some(Box::new(OpenAISafetyAlignmentParser::new())),
             "openai-security" => Some(Box::new(OpenAISecurityParser::new())),
             _ => None,
         }

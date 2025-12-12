@@ -6,6 +6,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
+import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import * as path from 'path';
 
 export class AiBlogInfrastructureStack extends cdk.Stack {
@@ -64,6 +65,13 @@ export class AiBlogInfrastructureStack extends cdk.Stack {
       websiteIndexDocument: 'index.html',
       websiteErrorDocument: '404.html',
       removalPolicy: cdk.RemovalPolicy.RETAIN,
+    });
+
+    // Upload prebuilt Next.js static export (expects blog-public/out to exist)
+    new s3deploy.BucketDeployment(this, 'PublicSiteDeployment', {
+      destinationBucket: publicSiteBucket,
+      sources: [s3deploy.Source.asset(path.join(__dirname, '../../blog-public/out'))],
+      prune: true, // remove old files so 404s stay in sync
     });
 
     // ========================================

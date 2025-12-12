@@ -2,15 +2,16 @@ use anyhow::Result;
 use async_trait::async_trait;
 use reqwest::Client;
 
+use crate::models::{ListingItem, ScrapedArticle};
 use crate::parsers::{
-    fetch_openai_news_listing, parse_openai_article, Parser, OPENAI_SECURITY_LISTING,
+    fetch_openai_news_listing, parse_openai_article, Parser, OPENAI_RESEARCH_LISTING,
 };
 
-pub struct OpenAISecurityParser {
+pub struct OpenAIResearchParser {
     client: Client,
 }
 
-impl OpenAISecurityParser {
+impl OpenAIResearchParser {
     pub fn new() -> Self {
         Self {
             client: Client::builder()
@@ -22,16 +23,16 @@ impl OpenAISecurityParser {
 }
 
 #[async_trait]
-impl Parser for OpenAISecurityParser {
+impl Parser for OpenAIResearchParser {
     fn name(&self) -> &str {
-        "openai-security"
+        "openai-research"
     }
 
-    async fn parse_listing(&self) -> Result<Vec<crate::models::ListingItem>> {
-        fetch_openai_news_listing(&self.client, OPENAI_SECURITY_LISTING, self.name()).await
+    async fn parse_listing(&self) -> Result<Vec<ListingItem>> {
+        fetch_openai_news_listing(&self.client, OPENAI_RESEARCH_LISTING, self.name()).await
     }
 
-    async fn parse_article(&self, url: &str) -> Result<crate::models::ScrapedArticle> {
+    async fn parse_article(&self, url: &str) -> Result<ScrapedArticle> {
         parse_openai_article(&self.client, url, self.name()).await
     }
 }
