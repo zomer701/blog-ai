@@ -6,7 +6,9 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
+import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
+import * as cr from 'aws-cdk-lib/custom-resources';
 import * as path from 'path';
 
 export class AiBlogInfrastructureStack extends cdk.Stack {
@@ -60,19 +62,90 @@ export class AiBlogInfrastructureStack extends cdk.Stack {
       bucketName: `ai-blog-public-${this.account}`,
       versioned: true,
       encryption: s3.BucketEncryption.S3_MANAGED,
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ACLS,
-      publicReadAccess: true,
-      websiteIndexDocument: 'index.html',
-      websiteErrorDocument: '404.html',
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
     });
 
+    const oac = new cloudfront.CfnOriginAccessControl(this, 'PublicSiteOAC', {
+      originAccessControlConfig: {
+        name: `public-site-oac-${this.account}`,
+        originAccessControlOriginType: 's3',
+        signingBehavior: 'always',
+        signingProtocol: 'sigv4',
+      },
+    });
+
+    const distribution = new cloudfront.CfnDistribution(this, 'PublicSiteDistribution', {
+      distributionConfig: {
+        enabled: true,
+        defaultRootObject: 'index.html',
+        origins: [
+          {
+            id: 'PublicSiteOrigin',
+            domainName: publicSiteBucket.bucketRegionalDomainName,
+            originAccessControlId: oac.attrId,
+            s3OriginConfig: {
+              originAccessIdentity: '',
+            },
+          },
+        ],
+        defaultCacheBehavior: {
+          targetOriginId: 'PublicSiteOrigin',
+          viewerProtocolPolicy: 'redirect-to-https',
+          allowedMethods: ['GET', 'HEAD'],
+          cachedMethods: ['GET', 'HEAD'],
+          cachePolicyId: cloudfront.CachePolicy.CACHING_OPTIMIZED.cachePolicyId,
+          compress: true,
+        },
+        priceClass: 'PriceClass_All',
+      },
+    });
+
+    const distributionArn = cdk.Stack.of(this).formatArn({
+      service: 'cloudfront',
+      resource: 'distribution',
+      resourceName: distribution.ref,
+    });
+
+    publicSiteBucket.addToResourcePolicy(
+      new iam.PolicyStatement({
+        actions: ['s3:GetObject'],
+        resources: [publicSiteBucket.arnForObjects('*')],
+        principals: [new iam.ServicePrincipal('cloudfront.amazonaws.com')],
+        conditions: {
+          StringEquals: {
+            'AWS:SourceArn': distributionArn,
+          },
+        },
+      })
+    );
+
     // Upload prebuilt Next.js static export (expects blog-public/out to exist)
-    new s3deploy.BucketDeployment(this, 'PublicSiteDeployment', {
+    const staticDeployment = new s3deploy.BucketDeployment(this, 'PublicSiteDeployment', {
       destinationBucket: publicSiteBucket,
       sources: [s3deploy.Source.asset(path.join(__dirname, '../../blog-public/out'))],
       prune: true, // remove old files so 404s stay in sync
     });
+
+    // CloudFront invalidation after each deploy to pick up fresh HTML/assets
+    const invalidate = new cr.AwsCustomResource(this, 'PublicSiteInvalidation', {
+      onUpdate: {
+        service: 'CloudFront',
+        action: 'createInvalidation',
+        parameters: {
+          DistributionId: distribution.ref,
+          InvalidationBatch: {
+            CallerReference: `${Date.now()}`,
+            Paths: { Quantity: 1, Items: ['/*'] },
+          },
+        },
+        physicalResourceId: cr.PhysicalResourceId.of(`PublicSiteInvalidation-${Date.now()}`),
+      },
+      policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
+        resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
+      }),
+    });
+    invalidate.node.addDependency(staticDeployment);
 
     // ========================================
     // IAM Roles
@@ -154,10 +227,6 @@ export class AiBlogInfrastructureStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'PublicSiteBucketName', {
       value: publicSiteBucket.bucketName,
       description: 'S3 bucket for static blog pages (public site)',
-    });
-    new cdk.CfnOutput(this, 'PublicSiteBucketWebsiteURL', {
-      value: publicSiteBucket.bucketWebsiteUrl,
-      description: 'S3 static website endpoint (point Cloudflare to this origin)',
     });
     new cdk.CfnOutput(this, 'PublicSiteBucketRegionalDomain', {
       value: publicSiteBucket.bucketRegionalDomainName,

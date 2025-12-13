@@ -8,9 +8,9 @@ import { Articles } from '../lib/storageData';
 
 const PAGE_SIZE = 15;
 
-type Language = 'en' | 'es' | 'uk';
+type Language = 'en' | 'es' | 'ukr';
 
-const LANGS: Language[] = ['en', 'es', 'uk'];
+const LANGS: Language[] = ['en', 'es', 'ukr'];
 
 const getPathLanguage = (): Language | null => {
   if (typeof window === 'undefined') return null;

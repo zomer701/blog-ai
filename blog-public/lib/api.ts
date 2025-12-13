@@ -39,7 +39,7 @@ export interface Article {
   };
   translations?: {
     es: Translation;
-    uk: Translation;
+    ukr: Translation;
   };
   metadata: {
     word_count?: number;

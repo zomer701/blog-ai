@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api, Article } from '@/lib/api';
 
-type Language = 'en' | 'es' | 'uk';
+type Language = 'en' | 'es' | 'ukr';
 
 type Props = {
   id: string;
@@ -24,7 +24,7 @@ export function ArticlePageClient({ id, searchParamsLang }: Props) {
     (searchParamsLang as Language) || 'en'
   );
 
-  const LANGS = useMemo(() => ['en', 'es', 'uk'] as const, []);
+  const LANGS = useMemo(() => ['en', 'es', 'ukr'] as const, []);
 
   const resolveId = useCallback((): string | null => {
     if (articleId) return articleId;
@@ -124,8 +124,8 @@ export function ArticlePageClient({ id, searchParamsLang }: Props) {
       if (!item) return '';
       if (language === 'es' && item.translations?.es)
         return item.translations.es.title;
-      if (language === 'uk' && item.translations?.uk)
-        return item.translations.uk.title;
+      if (language === 'ukr' && item.translations?.ukr)
+        return item.translations.ukr.title;
       return item.title;
     },
     [language]
@@ -136,8 +136,8 @@ export function ArticlePageClient({ id, searchParamsLang }: Props) {
       if (!item) return '';
       if (language === 'es' && item.translations?.es)
         return item.translations.es.content;
-      if (language === 'uk' && item.translations?.uk)
-        return item.translations.uk.content;
+      if (language === 'ukr' && item.translations?.ukr)
+        return item.translations.ukr.content;
       return item.content.text;
     },
     [language]
@@ -201,6 +201,52 @@ export function ArticlePageClient({ id, searchParamsLang }: Props) {
   };
 
   const heroMedia = useMemo(() => article?.content.images?.[0], [article]);
+  const bodyImages = useMemo(() => {
+    if (!article?.content.images) return [];
+    return article.content.images.slice(1);
+  }, [article]);
+
+  const contentBlocks = useMemo(() => {
+    const raw = getContent(article);
+    return raw
+      .split('\n\n')
+      .map((paragraph) => paragraph.trim())
+      .filter(Boolean)
+      .map((paragraph) => {
+        const imageMatch = paragraph.match(/^\[\[IMAGE_(\d+)(?:\|(.*))?\]\]$/);
+        if (imageMatch) {
+          const idx = Number(imageMatch[1]);
+          const src = article?.content.images?.[idx];
+          const caption = imageMatch[2]?.trim();
+          return { type: 'image' as const, src, caption };
+        }
+
+        const isCodeBlock =
+          paragraph.startsWith('```') && paragraph.endsWith('```');
+        if (isCodeBlock) {
+          return {
+            type: 'code' as const,
+            value: paragraph.slice(3, -3).trim(),
+          };
+        }
+
+        const lines = paragraph.split('\n').map((l) => l.trim());
+        const isList = lines.every((line) => line.startsWith('- '));
+        if (isList) {
+          return {
+            type: 'list' as const,
+            items: lines.map((line) => line.replace(/^- /, '').trim()),
+          };
+        }
+
+        return { type: 'paragraph' as const, value: paragraph };
+      });
+  }, [article, getContent]);
+
+  const hasImagePlaceholders = useMemo(
+    () => contentBlocks.some((b) => b.type === 'image'),
+    [contentBlocks]
+  );
   const isVideoHero =
     !!heroMedia && /\.(mp4|webm|mov|m4v)(\?.*)?$/i.test(heroMedia.split('?')[0]);
 
@@ -270,7 +316,7 @@ export function ArticlePageClient({ id, searchParamsLang }: Props) {
           </div>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 rounded-full bg-gray-100/80 px-2 py-1 text-sm text-gray-700 shadow-inner">
-              {(['en', 'es', 'uk'] as const).map((lang) => (
+              {(['en', 'es', 'ukr'] as const).map((lang) => (
                 <button
                   key={lang}
                   onClick={() => changeLanguage(lang)}
@@ -328,13 +374,79 @@ export function ArticlePageClient({ id, searchParamsLang }: Props) {
 
           <div className="grid gap-8 px-5 py-8 sm:px-8 sm:py-10 lg:grid-cols-[2fr,1fr] lg:gap-10">
             <div className="prose prose-lg max-w-none text-gray-800">
-              {getContent(article)
-                .split('\n\n')
-                .map((paragraph, index) => (
+              {contentBlocks.map((block, index) => {
+                if (block.type === 'code') {
+                  return (
+                    <pre
+                      key={index}
+                      className="article-code overflow-x-auto whitespace-pre rounded-xl border border-gray-200 bg-gray-50 p-4 text-xs font-mono text-gray-900 shadow-inner sm:text-sm"
+                    >
+                      <code>{block.value}</code>
+                    </pre>
+                  );
+                }
+
+                if (block.type === 'list') {
+                  return (
+                    <ul key={index} className="list-disc space-y-2 pl-6">
+                      {block.items.map((item, idx) => (
+                        <li key={idx} className="leading-relaxed text-gray-800">
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  );
+                }
+
+                if (block.type === 'image') {
+                  if (!block.src) return null;
+                  return (
+                    <figure
+                      key={index}
+                      className="overflow-hidden rounded-2xl border border-black/5 bg-gray-50 shadow-sm"
+                    >
+                      <img
+                        src={block.src}
+                        alt={block.caption || article.title}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                      {block.caption ? (
+                        <figcaption className="px-4 py-2 text-xs text-gray-600">
+                          {block.caption}
+                        </figcaption>
+                      ) : null}
+                    </figure>
+                  );
+                }
+
+                return (
                   <p key={index} className="leading-relaxed text-gray-800">
-                    {paragraph}
+                    {block.value}
                   </p>
-                ))}
+                );
+              })}
+
+              {!hasImagePlaceholders && bodyImages.length > 0 && (
+                <div className="mt-8 grid gap-4 sm:grid-cols-2">
+                  {bodyImages.map((img, idx) => (
+                    <figure
+                      key={idx}
+                      className="overflow-hidden rounded-2xl border border-black/5 bg-gray-50 shadow-sm"
+                    >
+                      <img
+                        src={img}
+                        alt={article.title}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                      <figcaption className="px-4 py-2 text-xs text-gray-600">
+                        {article.source}
+                      </figcaption>
+                    </figure>
+                  ))}
+                </div>
+              )}
             </div>
 
             <aside className="flex flex-col gap-4 rounded-2xl border border-black/5 bg-gray-50/80 p-5 text-sm text-gray-700 shadow-sm">

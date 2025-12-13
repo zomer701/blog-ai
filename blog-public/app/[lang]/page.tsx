@@ -5,5 +5,5 @@ export default function LangPage() {
 }
 
 export function generateStaticParams() {
-  return ['en', 'es', 'uk'].map((lang) => ({ lang }));
+  return ['en', 'es', 'ukr'].map((lang) => ({ lang }));
 }

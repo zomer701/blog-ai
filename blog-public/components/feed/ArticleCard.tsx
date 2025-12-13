@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { forwardRef, useMemo, useRef } from 'react';
 import type { Article } from '@/lib/api';
 
-type Language = 'en' | 'es' | 'uk';
+type Language = 'en' | 'es' | 'ukr';
 
 type ArticleCardProps = {
   article: Article;
@@ -43,8 +43,8 @@ function getTranslatedTitle(article: Article, language: Language) {
   if (language === 'es' && article.translations?.es) {
     return article.translations.es.title;
   }
-  if (language === 'uk' && article.translations?.uk) {
-    return article.translations.uk.title;
+  if (language === 'ukr' && article.translations?.ukr) {
+    return article.translations.ukr.title;
   }
   return article.title;
 }
@@ -53,8 +53,8 @@ function getTranslatedBody(article: Article, language: Language) {
   if (language === 'es' && article.translations?.es) {
     return article.translations.es.content;
   }
-  if (language === 'uk' && article.translations?.uk) {
-    return article.translations.uk.content;
+  if (language === 'ukr' && article.translations?.ukr) {
+    return article.translations.ukr.content;
   }
   return article.content.text;
 }
