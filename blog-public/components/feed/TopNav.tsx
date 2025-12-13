@@ -10,7 +10,7 @@ export type Category = {
   count: number;
 };
 
-type Language = 'en' | 'es' | 'ukr';
+type Language = 'ukr' | 'es' | 'en';
 type TopNavProps = {
   categories: Category[];
   activeCategory: string;
@@ -20,9 +20,9 @@ type TopNavProps = {
 };
 
 const languages: { label: string; value: Language }[] = [
-  { label: 'EN', value: 'en' },
-  { label: 'ES', value: 'es' },
   { label: 'UKR', value: 'ukr' },
+  { label: 'ES', value: 'es' },
+  { label: 'EN', value: 'en' },
 ];
 
 export const TopNav = memo(function TopNav({
