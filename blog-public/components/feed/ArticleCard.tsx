@@ -66,7 +66,11 @@ export const ArticleCard = forwardRef<HTMLDivElement, ArticleCardProps>(
   ) {
     const touchStartY = useRef<number | null>(null);
 
-    const media = article.content.images?.[0];
+    const arxivFallback = '/articles/sample-arxiv-decision-making-agents-hero.svg';
+    const isArxiv = article.metadata.tags.some(
+      (tag) => tag.toLowerCase() === 'arxiv'
+    );
+    const media = article.content.images?.[0] || (isArxiv ? arxivFallback : undefined);
     const hasMedia = Boolean(media);
     const isVideo =
       !!media && /\.(mp4|webm|mov|m4v)(\?.*)?$/i.test(media.split('?')[0]);
@@ -95,16 +99,14 @@ export const ArticleCard = forwardRef<HTMLDivElement, ArticleCardProps>(
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
         className={`group relative snap-start overflow-hidden rounded-3xl border border-black/5 bg-white shadow-lg shadow-black/5 transition duration-300 hover:-translate-y-1 hover:shadow-2xl dark:border-white/10 dark:bg-gray-900 dark:shadow-none ${className ?? ''}`}
-        style={{ minHeight: hasMedia ? '75vh' : '60vh' }}
+        style={{ minHeight: '75vh' }}
       >
         <Link
           href={`/article/${article.id}?lang=${language}`}
           aria-label={`Open ${article.title}`}
           className="absolute inset-0 z-10 sm:hidden"
         />
-        <div
-          className={`relative w-full ${hasMedia ? 'h-[68vh] sm:h-[55vh] lg:h-[48vh]' : 'h-[40vh] sm:h-[42vh] lg:h-[38vh]'}`}
-        >
+        <div className="relative w-full h-[68vh] sm:h-[55vh] lg:h-[48vh]">
           {media ? (
             isVideo ? (
               <video
@@ -122,7 +124,7 @@ export const ArticleCard = forwardRef<HTMLDivElement, ArticleCardProps>(
               />
             )
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-100 via-white to-gray-200 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800">
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-b from-gray-200 via-gray-100 to-gray-300 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800">
               <span className="text-sm font-semibold uppercase tracking-[0.3em] text-gray-400 dark:text-gray-500">
                 No Media
               </span>

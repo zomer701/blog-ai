@@ -69,6 +69,42 @@ body {
 .tag-anthropic { background-color: #D97757; color: #FFFFFF; }
 .tag-arxiv { background-color: #B31B1B; color: #FFFFFF; }
 
+.arxiv-prose {
+  font-family: "Georgia", "Times New Roman", serif;
+  line-height: 1.85;
+  letter-spacing: 0.01em;
+  color: #0f172a;
+}
+
+.arxiv-prose p {
+  font-size: 1.04rem;
+}
+
+.arxiv-prose h2,
+.arxiv-prose h3 {
+  font-family: "Georgia", "Times New Roman", serif;
+  letter-spacing: 0.02em;
+}
+
+.arxiv-prose a {
+  color: #b91c1c;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-decoration-color: rgba(185, 28, 28, 0.35);
+}
+
+.arxiv-prose .article-math {
+  background: radial-gradient(circle at 20% 20%, #fff7ed, #fff1f2 45%, #fff 70%);
+  border: 1px solid #fecdd3;
+  box-shadow: 0 10px 40px rgba(185, 28, 28, 0.08);
+  overflow-x: auto;
+}
+
+.arxiv-prose code,
+.arxiv-prose pre {
+  background: #0f172a0a;
+}
+
 /* Code block styling for article pages */
 .prose pre {
   background: #0f172a0d;
@@ -97,6 +133,16 @@ body {
 .dark .article-code {
   border-left-color: #1f2937;
   box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+}
+
+.article-math {
+  margin: 1.25rem 0;
+  font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  letter-spacing: 0.01em;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #fff5f5, #fff1f2);
+  border: 1px solid #fecdd3;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
 }
 
 .prose pre code {

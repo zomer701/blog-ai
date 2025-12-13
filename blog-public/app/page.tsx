@@ -10,7 +10,7 @@ const PAGE_SIZE = 15;
 
 type Language = 'en' | 'es' | 'ukr';
 
-const LANGS: Language[] = ['en', 'es', 'ukr'];
+const LANGS: Language[] = ['ukr', 'es', 'en'];
 
 const getPathLanguage = (): Language | null => {
   if (typeof window === 'undefined') return null;
@@ -73,21 +73,29 @@ export default function Home() {
       .sort((a, b) => b[1] - a[1])
       .map(([id, count]) => ({ id, label: id, count }));
 
-    return [
+    const categoriesList: Category[] = [
       { id: 'all', label: 'All stories', count: articles.length },
       ...topSources,
-      ...(dynamicTag
-        ? [
-            {
-              id: dynamicTag,
-              label: dynamicTag.startsWith('#') ? dynamicTag : dynamicTag,
-              count: articles.filter((a) =>
-                a.metadata.tags.includes(dynamicTag)
-              ).length,
-            },
-          ]
-        : []),
     ];
+
+    const seen = new Set(categoriesList.map((c) => c.id.toLowerCase()));
+    if (dynamicTag) {
+      const normalizedTag = dynamicTag.replace(/^#/, '');
+      const tagKey = normalizedTag.toLowerCase();
+      if (!seen.has(tagKey)) {
+        const count = articles.filter((a) =>
+          a.metadata.tags.some((tag) => tag.toLowerCase() === tagKey)
+        ).length;
+        categoriesList.push({
+          id: normalizedTag,
+          label: normalizedTag.startsWith('#') ? normalizedTag : `#${normalizedTag}`,
+          count,
+        });
+        seen.add(tagKey);
+      }
+    }
+
+    return categoriesList;
   }, [articles, dynamicTag]);
 
   const filtered = useMemo(() => {

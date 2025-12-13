@@ -1,0 +1,87 @@
+{
+  "id": "openai-introducing-gpt-5-2",
+  "slug": "openai-introducing-gpt-5-2",
+  "source": "openai",
+  "source_url": "https://openai.com/index/introducing-gpt-5-2/",
+  "title": "Introducing GPT‑5.2",
+  "author": "OpenAI",
+  "published_date": "2025-12-11",
+  "scraped_at": "2025-12-13T11:00:00",
+  "status": "published",
+  "metadata": {
+    "tags": [
+      "openai",
+      "gpt-5.2",
+      "product-release"
+    ]
+  },
+  "content": {
+    "text": "OpenAI introduced GPT‑5.2, a model family for professional work and long‑running agents.\nThe release emphasizes improvements in spreadsheet/presentation generation, coding, factuality, long‑context understanding, vision, and tool use.\nIn ChatGPT, GPT‑5.2 Instant, Thinking, and Pro roll out starting with paid plans; in the API, models are available to developers.\nOpenAI notes continued safety work and references updated system card details.",
+    "parsed": {
+      "topic": "product_release",
+      "tldr": [
+        "GPT‑5.2 is presented as OpenAI’s most capable GPT series for professional knowledge work and long‑running agent workflows.",
+        "Key upgrades focus on better end‑to‑end execution: creating artifacts (spreadsheets/slides), stronger coding, improved reliability, and better performance on very long documents.",
+        "Rollout includes three variants in ChatGPT (Instant, Thinking, Pro) and corresponding API model names."
+      ],
+      "sections": [
+        {
+          "title": "What GPT‑5.2 is",
+          "paragraphs": [
+            "GPT‑5.2 is a new model family aimed at professional knowledge work and complex, multi‑step projects. OpenAI positions it as a step forward in general capability, long‑context understanding, tool use, and vision."
+          ]
+        },
+        {
+          "title": "What’s improved",
+          "bullets": [
+            "More polished generation of work artifacts like spreadsheets and presentations",
+            "Stronger software engineering performance for debugging, feature work, and refactors",
+            "Fewer factual errors (more dependable for research and analysis, with the usual recommendation to double‑check critical outputs)",
+            "Better long‑context reasoning for analyzing very long documents and multi‑file projects",
+            "Improved vision and agentic tool‑calling for end‑to‑end workflows"
+          ]
+        },
+        {
+          "title": "Model variants in ChatGPT",
+          "bullets": [
+            "Instant: fast, capable default for everyday work and learning",
+            "Thinking: tuned for deeper work (complex tasks, long‑document summaries, math/logic, planning)",
+            "Pro: highest-quality option for difficult questions where reliability is prioritized"
+          ]
+        },
+        {
+          "title": "Availability",
+          "paragraphs": [
+            "OpenAI says GPT‑5.2 (Instant, Thinking, Pro) begins rolling out in ChatGPT starting with paid plans, and that the API versions are available to developers."
+          ]
+        },
+        {
+          "title": "API model names",
+          "bullets": [
+            "gpt-5.2 (Thinking)",
+            "gpt-5.2-chat-latest (Instant)",
+            "gpt-5.2-pro (Pro)"
+          ]
+        },
+        {
+          "title": "Safety note",
+          "paragraphs": [
+            "OpenAI highlights continued work on safety and reliability, including improvements in responses for sensitive conversations, and points readers to the system card update for details."
+          ]
+        }
+      ]
+    }
+  },
+  "translations": {
+    "es": {
+      "title": "Presentamos GPT‑5.2",
+      "content": "GPT‑5.2 es la nueva familia de modelos de OpenAI diseñada para trabajo profesional, análisis complejo y agentes de larga duración. La actualización se centra en una mayor fiabilidad, mejor razonamiento en contextos largos y una ejecución más sólida de tareas de principio a fin.\n\nEl modelo mejora la generación de artefactos como hojas de cálculo y presentaciones, refuerza el rendimiento en programación y reduce errores factuales en tareas analíticas. También amplía las capacidades de visión y el uso de herramientas, permitiendo flujos de trabajo más autónomos.\n\nEn ChatGPT, GPT‑5.2 se ofrece en tres variantes: Instant para uso rápido diario, Thinking para razonamiento profundo y Pro para los casos más exigentes donde la precisión es crítica. Las versiones equivalentes están disponibles a través de la API para desarrolladores.\n\nOpenAI señala que GPT‑5.2 se acompaña de mejoras continuas en seguridad y fiabilidad, descritas en la documentación y el system card actualizado.",
+      "edited": false
+    },
+    "ukr": {
+      "title": "Представляємо GPT‑5.2",
+      "content": "GPT‑5.2 — це нове сімейство моделей OpenAI, створене для професійної роботи, складної аналітики та довготривалих агентних сценаріїв. Оновлення зосереджене на вищій надійності, кращому міркуванні у великих контекстах і стабільнішому виконанні завдань від початку до кінця.\n\nМодель покращує створення робочих артефактів, таких як таблиці та презентації, підсилює можливості програмування та зменшує кількість фактичних помилок під час аналітичних задач. Також розширено можливості роботи з візуальними даними та інструментами, що дає змогу будувати більш автономні workflow.\n\nУ ChatGPT GPT‑5.2 доступний у трьох варіантах: Instant для швидких щоденних задач, Thinking для глибокого аналізу та Pro для найскладніших запитів, де важлива максимальна точність. Відповідні моделі доступні й через API для розробників.\n\nOpenAI також підкреслює постійну роботу над безпекою та надійністю GPT‑5.2, деталі якої наведені в оновленій системній документації.",
+      "edited": false
+    }
+  }
+}

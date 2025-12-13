@@ -1,9 +1,11 @@
 import Home from '../page';
 
+export const dynamicParams = false;
+
 export default function LangPage() {
   return <Home />;
 }
 
 export function generateStaticParams() {
-  return ['en', 'es', 'ukr'].map((lang) => ({ lang }));
+  return ['ukr', 'es', 'en'].map((lang) => ({ lang }));
 }
