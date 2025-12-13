@@ -101,16 +101,27 @@ export class AiBlogInfrastructureStack extends cdk.Stack {
       },
     });
 
-    const distributionArn = cdk.Stack.of(this).formatArn({
-      service: 'cloudfront',
-      resource: 'distribution',
-      resourceName: distribution.ref,
-    });
+    // CloudFront is a global service (no region component in ARN)
+    const distributionArn = `arn:${cdk.Aws.PARTITION}:cloudfront::${cdk.Aws.ACCOUNT_ID}:distribution/${distribution.ref}`;
 
     publicSiteBucket.addToResourcePolicy(
       new iam.PolicyStatement({
         actions: ['s3:GetObject'],
         resources: [publicSiteBucket.arnForObjects('*')],
+        principals: [new iam.ServicePrincipal('cloudfront.amazonaws.com')],
+        conditions: {
+          StringEquals: {
+            'AWS:SourceArn': distributionArn,
+          },
+        },
+      })
+    );
+
+    // Allow CloudFront to resolve default root objects without exposing the bucket
+    publicSiteBucket.addToResourcePolicy(
+      new iam.PolicyStatement({
+        actions: ['s3:ListBucket'],
+        resources: [publicSiteBucket.bucketArn],
         principals: [new iam.ServicePrincipal('cloudfront.amazonaws.com')],
         conditions: {
           StringEquals: {
@@ -231,6 +242,11 @@ export class AiBlogInfrastructureStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'PublicSiteBucketRegionalDomain', {
       value: publicSiteBucket.bucketRegionalDomainName,
       description: 'Regional domain name for Cloudflare custom origin',
+    });
+
+    new cdk.CfnOutput(this, 'PublicSiteDistributionDomain', {
+      value: distribution.attrDomainName,
+      description: 'CloudFront domain for the static site',
     });
 
     new cdk.CfnOutput(this, 'ScraperFunctionName', {
