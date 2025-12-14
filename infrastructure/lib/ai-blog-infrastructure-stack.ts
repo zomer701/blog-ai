@@ -218,22 +218,6 @@ export class AiBlogInfrastructureStack extends cdk.Stack {
       },
     });
 
-    // Publisher Lambda Function (stub to update static site bucket)
-    const publisherLambda = new lambda.Function(this, 'PublisherFunction', {
-      functionName: 'ai-blog-site-publisher',
-      runtime: lambda.Runtime.PROVIDED_AL2,
-      architecture: lambda.Architecture.ARM_64,
-      handler: 'bootstrap',
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../serverless/target/lambda/site_publisher')),
-      role: lambdaExecutionRole,
-      timeout: cdk.Duration.minutes(5),
-      memorySize: 256,
-      environment: {
-        PUBLIC_SITE_BUCKET: publicSiteBucket.bucketName,
-        RUST_LOG: 'info',
-      },
-    });
-
     // ========================================
     // Outputs
     // ========================================
@@ -270,11 +254,6 @@ export class AiBlogInfrastructureStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'ScraperFunctionName', {
       value: scraperLambda.functionName,
       description: 'Scraper Lambda Function Name',
-    });
-
-    new cdk.CfnOutput(this, 'PublisherFunctionName', {
-      value: publisherLambda.functionName,
-      description: 'Publisher Lambda Function Name',
     });
   }
 }

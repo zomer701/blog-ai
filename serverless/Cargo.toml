@@ -34,11 +34,5 @@ path = "src/lambdas/scraper_handler.rs"
 test = false
 required-features = ["lambda"]
 
-[[bin]]
-name = "site_publisher"
-path = "src/lambdas/site_publisher.rs"
-test = false
-required-features = ["lambda"]
-
 [profile.dev]
 debug = true
