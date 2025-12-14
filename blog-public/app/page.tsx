@@ -1,16 +1,21 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { Article } from '@/lib/api';
 import { ArticleCard } from '../components/feed/ArticleCard';
 import { TopNav, Category } from '../components/feed/TopNav';
 import { Articles } from '../lib/storageData';
+import { LANGUAGES, type Language } from '@/lib/articleUtils';
 
 const PAGE_SIZE = 15;
 
-type Language = 'en' | 'es' | 'ukr';
-
-const LANGS: Language[] = ['ukr', 'es', 'en'];
+const LANGS: readonly Language[] = LANGUAGES;
 
 const getPathLanguage = (): Language | null => {
   if (typeof window === 'undefined') return null;
@@ -38,23 +43,33 @@ const setCookieLanguage = (lang: Language) => {
 export default function Home() {
   const articles: Article[] = Articles;
   const [language, setLanguage] = useState<Language>('en');
+  const [languageReady, setLanguageReady] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [page, setPage] = useState(0);
   const [dynamicTag, setDynamicTag] = useState<string | null>(null);
 
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const initialLang =
       getPathLanguage() ?? getCookieLanguage() ?? ('en' as Language);
-    if (initialLang !== language) {
-      setLanguage(initialLang);
-      setCookieLanguage(initialLang);
-    } else {
-      setCookieLanguage(initialLang);
-    }
+    setLanguage(initialLang);
+    setCookieLanguage(initialLang);
+    setLanguageReady(true);
     // run once on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const tagParam = params.get('tag');
+    if (tagParam) {
+      const normalized = tagParam.startsWith('#') ? tagParam : `#${tagParam}`;
+      setDynamicTag(normalized);
+      setActiveCategory(normalized);
+      setPage(0);
+    }
   }, []);
 
   const categories: Category[] = useMemo(() => {
@@ -127,6 +142,12 @@ export default function Home() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
+
+  if (!languageReady) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white text-gray-900" />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">

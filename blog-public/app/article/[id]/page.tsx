@@ -1,6 +1,7 @@
 import { Articles } from '../../../lib/storageData';
 import { ArticlePageClient } from './ArticlePageClient';
 import { notFound } from 'next/navigation';
+import { type Language } from '@/lib/articleUtils';
 
 type PageProps = {
   params: { id: string } | Promise<{ id: string }>;
@@ -14,7 +15,9 @@ export default async function Page({ params }: PageProps) {
     notFound();
   }
 
-  return <ArticlePageClient article={article} />;
+  const initialLanguage: Language = 'en';
+
+  return <ArticlePageClient article={article} initialLanguage={initialLanguage} />;
 }
 
 export function generateStaticParams() {
