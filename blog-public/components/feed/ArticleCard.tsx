@@ -71,7 +71,6 @@ export const ArticleCard = forwardRef<HTMLDivElement, ArticleCardProps>(
       (tag) => tag.toLowerCase() === 'arxiv'
     );
     const media = article.content.images?.[0] || (isArxiv ? arxivFallback : undefined);
-    const hasMedia = Boolean(media);
     const isVideo =
       !!media && /\.(mp4|webm|mov|m4v)(\?.*)?$/i.test(media.split('?')[0]);
 
@@ -99,14 +98,13 @@ export const ArticleCard = forwardRef<HTMLDivElement, ArticleCardProps>(
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
         className={`group relative snap-start overflow-hidden rounded-3xl border border-black/5 bg-white shadow-lg shadow-black/5 transition duration-300 hover:-translate-y-1 hover:shadow-2xl dark:border-white/10 dark:bg-gray-900 dark:shadow-none ${className ?? ''}`}
-        style={{ minHeight: '75vh' }}
       >
         <Link
           href={`/article/${article.id}?lang=${language}`}
           aria-label={`Open ${article.title}`}
           className="absolute inset-0 z-10 sm:hidden"
         />
-        <div className="relative w-full h-[68vh] sm:h-[55vh] lg:h-[48vh]">
+        <div className="relative w-full h-[50vw] sm:h-[55vh] lg:h-[48vh]">
           {media ? (
             isVideo ? (
               <video

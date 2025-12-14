@@ -138,6 +138,23 @@ export class AiBlogInfrastructureStack extends cdk.Stack {
       prune: true, // remove old files so 404s stay in sync
     });
 
+    const articleExtensionlessDeployment = new s3deploy.BucketDeployment(
+      this,
+      'ArticleExtensionlessMetadataDeployment',
+      {
+        destinationBucket: publicSiteBucket,
+        destinationKeyPrefix: 'article',
+        sources: [
+          s3deploy.Source.asset(path.join(__dirname, '../../blog-public/out/article'), {
+            exclude: ['*.html', '*.txt', '__article_data/*'],
+          }),
+        ],
+        prune: false, // prevent removing the already deployed html/txt variants
+        contentType: 'text/html', // ensure extensionless files render as HTML
+      }
+    );
+    articleExtensionlessDeployment.node.addDependency(staticDeployment);
+
     // CloudFront invalidation after each deploy to pick up fresh HTML/assets
     const invalidate = new cr.AwsCustomResource(this, 'PublicSiteInvalidation', {
       onUpdate: {
@@ -157,6 +174,7 @@ export class AiBlogInfrastructureStack extends cdk.Stack {
       }),
     });
     invalidate.node.addDependency(staticDeployment);
+    invalidate.node.addDependency(articleExtensionlessDeployment);
 
     // ========================================
     // IAM Roles

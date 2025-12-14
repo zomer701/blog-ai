@@ -9,36 +9,17 @@ import { api, Article } from '@/lib/api';
 type Language = 'en' | 'es' | 'ukr';
 
 type Props = {
-  id: string;
+  article: Article;
 };
 
-export function ArticlePageClient({ id }: Props) {
+export function ArticlePageClient({ article }: Props) {
   const router = useRouter();
 
-  const [articleId, setArticleId] = useState<string | null>(id || null);
-  const [article, setArticle] = useState<Article | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [language, setLanguage] = useState<Language>('en');
+  const [selectedLanguage, setSelectedLanguage] = useState<Language | null>(
+    null
+  );
 
   const LANGS = useMemo(() => ['ukr', 'es', 'en'] as const, []);
-
-  const resolveId = useCallback((): string | null => {
-    if (articleId) return articleId;
-    if (id) return id;
-    if (typeof window !== 'undefined') {
-      const parts = window.location.pathname.split('/').filter(Boolean);
-      return parts[parts.length - 1] || null;
-    }
-    return null;
-  }, [articleId, id]);
-
-  useEffect(() => {
-    const current = resolveId();
-    if (current && current !== articleId) {
-      setArticleId(current);
-    }
-  }, [articleId, resolveId]);
 
   const getPathLanguage = useCallback((): Language | null => {
     if (typeof window === 'undefined') return null;
@@ -73,56 +54,30 @@ export function ArticlePageClient({ id }: Props) {
       : null;
   }, [LANGS]);
 
-  const loadArticle = useCallback(async () => {
-    const targetId = resolveId();
-    if (!targetId) {
-      setError('Missing article id');
-      setLoading(false);
-      return;
-    }
-    setArticleId(targetId);
-
-    try {
-      setLoading(true);
-      const data = await api.getArticle(targetId);
-      setArticle(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load article');
-    } finally {
-      setLoading(false);
-    }
-  }, [resolveId]);
-
-  useEffect(() => {
+  const baseLanguage = useMemo(() => {
     const pathLang = getPathLanguage();
     const cookieLang = getCookieLanguage();
     const paramLang = getQueryLanguage();
-    const nextLang = paramLang || pathLang || cookieLang || 'en';
-    setLanguage(nextLang);
-    setCookieLanguage(nextLang);
+    return (paramLang || pathLang || cookieLang || 'en') as Language;
+  }, [getCookieLanguage, getPathLanguage, getQueryLanguage]);
 
-    loadArticle();
-  }, [
-    getCookieLanguage,
-    getPathLanguage,
-    loadArticle,
-    getQueryLanguage,
-    setCookieLanguage,
-  ]);
+  const language = selectedLanguage ?? baseLanguage;
 
   useEffect(() => {
-    if (article) {
-      api.trackView(article.id);
-    }
-  }, [article]);
+    setCookieLanguage(language);
+  }, [language, setCookieLanguage]);
 
-  const changeLanguage = (newLang: Language) => {
-    const targetId = resolveId();
-    if (!targetId) return;
-    setLanguage(newLang);
-    setCookieLanguage(newLang);
-    router.push(`/article/${targetId}?lang=${newLang}`);
-  };
+  useEffect(() => {
+    api.trackView(article.id);
+  }, [article.id]);
+
+  const changeLanguage = useCallback(
+    (newLang: Language) => {
+      setSelectedLanguage(newLang);
+      router.push(`/article/${article.id}?lang=${newLang}`);
+    },
+    [article.id, router]
+  );
 
   const getTitle = useCallback(
     (item: Article | null) => {
@@ -191,9 +146,10 @@ export function ArticlePageClient({ id }: Props) {
     return `rgba(${r}, ${g}, ${b}, 0.08)`;
   };
 
-  const primaryTag = article?.metadata.tags?.[0];
+  const primaryTag = article.metadata.tags?.[0];
   const isArxiv =
-    article?.metadata.tags?.some((tag) => tag.toLowerCase() === 'arxiv') ?? false;
+    article.metadata.tags?.some((tag) => tag.toLowerCase() === 'arxiv') ??
+    false;
 
   const formatDate = (dateString: string) => {
     try {
@@ -207,104 +163,69 @@ export function ArticlePageClient({ id }: Props) {
     }
   };
 
-  const heroMedia = useMemo(() => article?.content.images?.[0], [article]);
-  const bodyImages = useMemo(() => {
-    if (!article?.content.images) return [];
-    return article.content.images.slice(1);
-  }, [article]);
+  const heroMedia = article.content.images?.[0];
+  const bodyImages = article.content.images?.slice(1) ?? [];
 
-  const contentBlocks = useMemo(() => {
-    const raw = getContent(article);
-    return raw
-      .split('\n\n')
-      .map((paragraph) => paragraph.trim())
-      .filter(Boolean)
-      .map((paragraph) => {
-        const imageMatch = paragraph.match(/^\[\[IMAGE_(\d+)(?:\|(.*))?\]\]$/);
-        if (imageMatch) {
-          const idx = Number(imageMatch[1]);
-          const src = article?.content.images?.[idx];
-          const caption = imageMatch[2]?.trim();
-          return { type: 'image' as const, src, caption };
-        }
+  const contentBlocks = getContent(article)
+    .split('\n\n')
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+    .map((paragraph) => {
+      const imageMatch = paragraph.match(/^\[\[IMAGE_(\d+)(?:\|(.*))?\]\]$/);
+      if (imageMatch) {
+        const idx = Number(imageMatch[1]);
+        const src = article.content.images?.[idx];
+        const caption = imageMatch[2]?.trim();
+        return { type: 'image' as const, src, caption };
+      }
 
-        const isCodeBlock =
-          paragraph.startsWith('```') && paragraph.endsWith('```');
-        if (isCodeBlock) {
-          return {
-            type: 'code' as const,
-            value: paragraph.slice(3, -3).trim(),
-          };
-        }
+      const isCodeBlock =
+        paragraph.startsWith('```') && paragraph.endsWith('```');
+      if (isCodeBlock) {
+        return {
+          type: 'code' as const,
+          value: paragraph.slice(3, -3).trim(),
+        };
+      }
 
-        const looksHtml = /<div[^>]*>|<p[^>]*>|<figure[^>]*>/i.test(paragraph);
-        if (looksHtml) {
-          return { type: 'html' as const, value: paragraph };
-        }
+      const looksHtml = /<div[^>]*>|<p[^>]*>|<figure[^>]*>/i.test(paragraph);
+      if (looksHtml) {
+        return { type: 'html' as const, value: paragraph };
+      }
 
-        const lines = paragraph.split('\n').map((l) => l.trim());
-        const isList = lines.every((line) => line.startsWith('- '));
-        if (isList) {
-          return {
-            type: 'list' as const,
-            items: lines.map((line) => line.replace(/^- /, '').trim()),
-          };
-        }
+      const lines = paragraph.split('\n').map((l) => l.trim());
+      const isList = lines.every((line) => line.startsWith('- '));
+      if (isList) {
+        return {
+          type: 'list' as const,
+          items: lines.map((line) => line.replace(/^- /, '').trim()),
+        };
+      }
 
-        const looksMath = /\\\\[a-zA-Z]+|Ω|→|∞|∑|\\bpi\\b|\\bsigma\\b|\\btheta\\b|\\blambda\\b|\\balpha\\b|\\bbeta\\b|\\bmathcal\\b|\\bmathtt\\b|\\bleq\\b|\\bgeq\\b|\\bneq\\b/.test(
-          paragraph
-        );
-        if (looksMath) {
-          return { type: 'math' as const, value: paragraph };
-        }
+      const looksMath = /\\\\[a-zA-Z]+|Ω|→|∞|∑|\\bpi\\b|\\bsigma\\b|\\btheta\\b|\\blambda\\b|\\balpha\\b|\\bbeta\\b|\\bmathcal\\b|\\bmathtt\\b|\\bleq\\b|\\bgeq\\b|\\bneq\\b/.test(
+        paragraph
+      );
+      if (looksMath) {
+        return { type: 'math' as const, value: paragraph };
+      }
 
-        return { type: 'paragraph' as const, value: paragraph };
-      });
-  }, [article, getContent]);
+      return { type: 'paragraph' as const, value: paragraph };
+    });
 
-  const hasImagePlaceholders = useMemo(
-    () => contentBlocks.some((b) => b.type === 'image'),
-    [contentBlocks]
-  );
+  const hasImagePlaceholders = contentBlocks.some((b) => b.type === 'image');
   const isVideoHero =
     !!heroMedia && /\.(mp4|webm|mov|m4v)(\?.*)?$/i.test(heroMedia.split('?')[0]);
   const arxivFallbackHero = '/articles/sample-arxiv-decision-making-agents-hero.svg';
   const pdfUrl =
-    isArxiv && article?.source_url.includes('/abs/')
+    isArxiv && article.source_url.includes('/abs/')
       ? article.source_url.replace('/abs/', '/pdf/')
       : null;
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-gray-900 via-black to-gray-950 text-white">
-        <div className="text-center">
-          <div className="inline-block h-12 w-12 animate-spin rounded-full border-2 border-white/30 border-b-white" />
-          <p className="mt-4 text-sm text-white/70">Loading article...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !article) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
-        <div className="max-w-md rounded-2xl border border-red-200 bg-white p-6 shadow-lg">
-          <p className="text-lg font-semibold text-red-700">Error loading article</p>
-          <p className="mt-2 text-sm text-red-600">{error}</p>
-          <Link
-            href="/"
-            className="mt-4 inline-block text-sm font-semibold text-blue-600 hover:text-blue-800"
-          >
-            ← Back to home
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div
-      className={`min-h-screen bg-gradient-to-b text-gray-900 ${isArxiv ? 'from-red-50 via-white to-amber-50' : 'from-gray-50 via-white to-gray-100'}`}
+      className={`min-h-screen bg-gradient-to-b text-gray-900 ${
+        isArxiv ? 'from-red-50 via-white to-amber-50' : 'from-gray-50 via-white to-gray-100'
+      }`}
       style={{ backgroundColor: tagTint(primaryTag) }}
     >
       <header className="sticky top-0 z-30 border-b border-black/5 bg-white/80 backdrop-blur-md">
@@ -315,7 +236,6 @@ export function ArticlePageClient({ id }: Props) {
               prefetch={false}
               aria-label="Home"
               onClick={(e) => {
-                // Force hard navigation so the page fully refreshes
                 e.preventDefault();
                 window.location.assign('/');
               }}

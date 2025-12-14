@@ -31,10 +31,15 @@ function ensureIndexPages(articles) {
     const htmlFile = path.join(OUT_DIR, `${article.id}.html`);
     if (!fs.existsSync(htmlFile)) continue;
 
-    const targetDir = path.join(OUT_DIR, article.id);
-    const targetIndex = path.join(targetDir, 'index.html');
-    fs.mkdirSync(targetDir, { recursive: true });
-    fs.copyFileSync(htmlFile, targetIndex);
+    const articleDir = path.join(OUT_DIR, article.id);
+    if (fs.existsSync(articleDir) && fs.statSync(articleDir).isDirectory()) {
+      const archiveDir = path.join(OUT_DIR, '__article_data', article.id);
+      fs.mkdirSync(path.dirname(archiveDir), { recursive: true });
+      fs.renameSync(articleDir, archiveDir);
+    }
+
+    const targetFile = path.join(OUT_DIR, article.id);
+    fs.copyFileSync(htmlFile, targetFile);
   }
 }
 
