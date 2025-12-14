@@ -10,19 +10,16 @@ type Language = 'en' | 'es' | 'ukr';
 
 type Props = {
   id: string;
-  searchParamsLang?: string;
 };
 
-export function ArticlePageClient({ id, searchParamsLang }: Props) {
+export function ArticlePageClient({ id }: Props) {
   const router = useRouter();
 
   const [articleId, setArticleId] = useState<string | null>(id || null);
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [language, setLanguage] = useState<Language>(
-    (searchParamsLang as Language) || 'en'
-  );
+  const [language, setLanguage] = useState<Language>('en');
 
   const LANGS = useMemo(() => ['ukr', 'es', 'en'] as const, []);
 
@@ -68,6 +65,14 @@ export function ArticlePageClient({ id, searchParamsLang }: Props) {
     )}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
   }, []);
 
+  const getQueryLanguage = useCallback((): Language | null => {
+    if (typeof window === 'undefined') return null;
+    const value = new URLSearchParams(window.location.search).get('lang');
+    return value && LANGS.includes(value as Language)
+      ? (value as Language)
+      : null;
+  }, [LANGS]);
+
   const loadArticle = useCallback(async () => {
     const targetId = resolveId();
     if (!targetId) {
@@ -91,7 +96,7 @@ export function ArticlePageClient({ id, searchParamsLang }: Props) {
   useEffect(() => {
     const pathLang = getPathLanguage();
     const cookieLang = getCookieLanguage();
-    const paramLang = searchParamsLang as Language | undefined;
+    const paramLang = getQueryLanguage();
     const nextLang = paramLang || pathLang || cookieLang || 'en';
     setLanguage(nextLang);
     setCookieLanguage(nextLang);
@@ -101,7 +106,7 @@ export function ArticlePageClient({ id, searchParamsLang }: Props) {
     getCookieLanguage,
     getPathLanguage,
     loadArticle,
-    searchParamsLang,
+    getQueryLanguage,
     setCookieLanguage,
   ]);
 
@@ -542,20 +547,6 @@ export function ArticlePageClient({ id, searchParamsLang }: Props) {
                   {article.source} ↗
                 </a>
               </div>
-              {isArxiv && pdfUrl ? (
-                <div className="rounded-xl border border-red-100 bg-white/90 px-3 py-3 text-sm text-red-900 shadow-inner">
-                  <div className="text-xs uppercase tracking-wide text-red-700/80">PDF</div>
-                  <a
-                    href={pdfUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-1 inline-flex items-center gap-2 font-semibold hover:underline"
-                  >
-                    Read 2512.10937v1.pdf
-                  </a>
-
-                </div>
-              ) : null}
               <div>
                 <div className="text-xs uppercase tracking-wide text-gray-500">Tags</div>
                 <div className="mt-2 flex flex-wrap gap-2">
