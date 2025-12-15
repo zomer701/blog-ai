@@ -1,26 +1,18 @@
 import type { Article } from './api';
 
-export const LANGUAGES = ['ukr', 'es', 'en'] as const;
+export const LANGUAGES = ['ukr', 'es', 'en', 'pt', 'zh', 'hi'] as const;
 export type Language = (typeof LANGUAGES)[number];
 
 export function getLocalizedTitle(article: Article, language: Language): string {
-  if (language === 'es' && article.translations?.es) {
-    return article.translations.es.title;
-  }
-  if (language === 'ukr' && article.translations?.ukr) {
-    return article.translations.ukr.title;
-  }
-  return article.title;
+  const translation = article.translations?.[language];
+  const title = translation?.title?.trim();
+  return title ? title : article.title;
 }
 
 export function getLocalizedText(article: Article, language: Language): string {
-  if (language === 'es' && article.translations?.es) {
-    return article.translations.es.content;
-  }
-  if (language === 'ukr' && article.translations?.ukr) {
-    return article.translations.ukr.content;
-  }
-  return article.content.text;
+  const translation = article.translations?.[language];
+  const content = translation?.content?.trim();
+  return content ? content : article.content.text;
 }
 
 const bulletLinePattern = /^[\u2022•\-–—*]+\s*(.+)$/;
@@ -223,6 +215,55 @@ export function getWatchNextBullets(
   }
 
   return candidates;
+}
+
+const LABELS: Record<
+  Language,
+  Record<'whyItMatters' | 'watchNext' | 'readMore' | 'updated', string>
+> = {
+  en: {
+    whyItMatters: 'Why it matters',
+    watchNext: 'What to watch next',
+    readMore: 'Read more →',
+    updated: 'Updated',
+  },
+  ukr: {
+    whyItMatters: 'Чому це важливо',
+    watchNext: 'Що дивитися далі',
+    readMore: 'Читати далі →',
+    updated: 'Оновлено',
+  },
+  es: {
+    whyItMatters: 'Por qué es importante',
+    watchNext: 'Qué ver después',
+    readMore: 'Leer más →',
+    updated: 'Actualizado',
+  },
+  pt: {
+    whyItMatters: 'Por que isso importa',
+    watchNext: 'O que assistir a seguir',
+    readMore: 'Leia mais →',
+    updated: 'Atualizado',
+  },
+  zh: {
+    whyItMatters: '为什么重要',
+    watchNext: '接下来要关注',
+    readMore: '阅读更多 →',
+    updated: '更新',
+  },
+  hi: {
+    whyItMatters: 'क्यों यह मायने रखता है',
+    watchNext: 'आगे क्या देखें',
+    readMore: 'और पढ़ें →',
+    updated: 'अपडेट किया गया',
+  },
+};
+
+export function getLocalizedLabel(
+  label: 'whyItMatters' | 'watchNext' | 'readMore' | 'updated',
+  language: Language
+): string {
+  return LABELS[language]?.[label] ?? LABELS.en[label];
 }
 
 export function formatTagLabel(tag: string): string {

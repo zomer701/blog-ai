@@ -12,6 +12,7 @@ import { api, type Article } from '@/lib/api';
 import {
   formatTagLabel,
   getImportanceBullets,
+  getLocalizedLabel,
   getLocalizedText,
   getLocalizedTitle,
   getSummaryBullets,
@@ -91,6 +92,9 @@ export function ArticlePageClient({ article, initialLanguage }: Props) {
   }, [article.id]);
 
   const effectiveLanguage = language ?? initialLanguage;
+  const whyItMattersLabel = getLocalizedLabel('whyItMatters', effectiveLanguage);
+  const watchNextLabel = getLocalizedLabel('watchNext', effectiveLanguage);
+  const updatedLabel = getLocalizedLabel('updated', effectiveLanguage);
 
   const localizedTitle = useMemo(
     () => getLocalizedTitle(article, effectiveLanguage),
@@ -190,7 +194,7 @@ export function ArticlePageClient({ article, initialLanguage }: Props) {
               <span className="rounded-full bg-gray-900 px-3 py-1 text-[10px] font-semibold text-white shadow-inner">
                 30 sec read
               </span>
-              <span className="text-gray-600">Updated {formattedDate}</span>
+              <span className="text-gray-600">{updatedLabel} {formattedDate}</span>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-gray-600">Source:</span>
@@ -273,7 +277,7 @@ export function ArticlePageClient({ article, initialLanguage }: Props) {
 
         <section className="space-y-4 rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
           <div className="text-xs uppercase tracking-[0.4em] text-gray-500">
-            Why it matters
+            {whyItMattersLabel}
           </div>
           <ul className="space-y-3 text-sm text-gray-700">
             {(importanceBullets.length ? importanceBullets : [
@@ -289,7 +293,7 @@ export function ArticlePageClient({ article, initialLanguage }: Props) {
 
         <section className="space-y-4 rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
           <div className="text-xs uppercase tracking-[0.4em] text-gray-500">
-            What to watch next
+            {watchNextLabel}
           </div>
           <ul className="space-y-3 text-sm text-gray-700">
             {watchNextBullets.map((bullet, index) => (

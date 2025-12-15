@@ -75,12 +75,27 @@
   "translations": {
     "es": {
       "title": "Presentamos GPT‑5.2",
-      "content": "GPT‑5.2 es la nueva familia de modelos de OpenAI diseñada para trabajo profesional, análisis complejo y agentes de larga duración. La actualización se centra en una mayor fiabilidad, mejor razonamiento en contextos largos y una ejecución más sólida de tareas de principio a fin.\n\nEl modelo mejora la generación de artefactos como hojas de cálculo y presentaciones, refuerza el rendimiento en programación y reduce errores factuales en tareas analíticas. También amplía las capacidades de visión y el uso de herramientas, permitiendo flujos de trabajo más autónomos.\n\nEn ChatGPT, GPT‑5.2 se ofrece en tres variantes: Instant para uso rápido diario, Thinking para razonamiento profundo y Pro para los casos más exigentes donde la precisión es crítica. Las versiones equivalentes están disponibles a través de la API para desarrolladores.\n\nOpenAI señala que GPT‑5.2 se acompaña de mejoras continuas en seguridad y fiabilidad, descritas en la documentación y el system card actualizado.",
+      "content": "OpenAI presentó GPT‑5.2, una familia modelo para trabajo profesional y agentes de larga duración.\nEl comunicado enfatiza las mejoras en la generación de hojas de cálculo/presentaciones, codificación, factualidad, comprensión de contexto largo, visión y uso de herramientas.\nEn ChatGPT, GPT‑5.2 Instant, Thinking y Pro se implementan comenzando con planes pagos;En la API, los modelos están disponibles para los desarrolladores.\nOpenAI señala el trabajo de seguridad continuo y hace referencia a detalles actualizados de la tarjeta del sistema.",
       "edited": false
     },
     "ukr": {
       "title": "Представляємо GPT‑5.2",
-      "content": "GPT‑5.2 — це нове сімейство моделей OpenAI, створене для професійної роботи, складної аналітики та довготривалих агентних сценаріїв. Оновлення зосереджене на вищій надійності, кращому міркуванні у великих контекстах і стабільнішому виконанні завдань від початку до кінця.\n\nМодель покращує створення робочих артефактів, таких як таблиці та презентації, підсилює можливості програмування та зменшує кількість фактичних помилок під час аналітичних задач. Також розширено можливості роботи з візуальними даними та інструментами, що дає змогу будувати більш автономні workflow.\n\nУ ChatGPT GPT‑5.2 доступний у трьох варіантах: Instant для швидких щоденних задач, Thinking для глибокого аналізу та Pro для найскладніших запитів, де важлива максимальна точність. Відповідні моделі доступні й через API для розробників.\n\nOpenAI також підкреслює постійну роботу над безпекою та надійністю GPT‑5.2, деталі якої наведені в оновленій системній документації.",
+      "content": "OpenAI представила GPT‑5.2, сімейство моделей для професійної роботи та довготривалих агентів.\nУ випуску наголошується на вдосконаленні створення електронних таблиць/презентацій, кодування, фактичності, розуміння тривалого контексту, бачення та використання інструментів.\nУ ChatGPT розгортаються GPT‑5.2 Instant, Thinking і Pro, починаючи з платних планів;в API моделі доступні розробникам.\nOpenAI відзначає продовження роботи з безпеки та посилається на оновлені дані системної карти.",
+      "edited": false
+    },
+    "pt": {
+      "title": "Apresentando GPT-5.2",
+      "content": "A OpenAI introduziu o GPT‑5.2, uma família de modelos para trabalho profissional e agentes de longa duração.\nO lançamento enfatiza melhorias na geração de planilhas/apresentações, codificação, factualidade, compreensão de contexto longo, visão e uso de ferramentas.\nNo ChatGPT, GPT‑5.2 Instant, Thinking e Pro são implementados começando com planos pagos;na API, os modelos estão disponíveis para os desenvolvedores.\nA OpenAI observa o trabalho contínuo de segurança e faz referência a detalhes atualizados do cartão do sistema.",
+      "edited": false
+    },
+    "zh": {
+      "title": "GPT-5.2 简介",
+      "content": "OpenAI 推出了 GPT-5.2，这是一个适用于专业工作和长期运行代理的模型系列。\n该版本强调电子表格/演示文稿生成、编码、事实性、长上下文理解、愿景和工具使用方面的改进。\n在 ChatGPT 中，GPT-5.2 Instant、Thinking 和 Pro 从付费计划开始推出；在 API 中，模型可供开发人员使用。\nOpenAI 指出了持续的安全工作并引用了更新的系统卡详细信息。",
+      "edited": false
+    },
+    "hi": {
+      "title": "GPT‑5.2 का परिचय",
+      "content": "OpenAI ने GPT‑5.2 पेश किया, जो पेशेवर काम और लंबे समय तक चलने वाले एजेंटों के लिए एक मॉडल परिवार है।\nयह रिलीज़ स्प्रेडशीट/प्रस्तुति निर्माण, कोडिंग, तथ्यात्मकता, लंबे संदर्भ की समझ, दृष्टि और उपकरण के उपयोग में सुधार पर जोर देती है।\nचैटजीपीटी में, जीपीटी‑5.2 इंस्टेंट, थिंकिंग और प्रो को सशुल्क योजनाओं के साथ शुरू किया गया है;एपीआई में, मॉडल डेवलपर्स के लिए उपलब्ध हैं।\nOpenAI नोट करता है कि सुरक्षा कार्य जारी है और अद्यतन सिस्टम कार्ड विवरण का संदर्भ देता है।",
       "edited": false
     }
   }

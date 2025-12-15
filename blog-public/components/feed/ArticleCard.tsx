@@ -5,6 +5,7 @@ import { forwardRef, useMemo, useRef } from 'react';
 import type { Article } from '@/lib/api';
 import {
   getImportanceBullets,
+  getLocalizedLabel,
   getLocalizedText,
   getLocalizedTitle,
   getSummaryBullets,
@@ -96,7 +97,7 @@ export const ArticleCard = forwardRef<HTMLDivElement, ArticleCardProps>(
           </div>
           <div className="space-y-1">
             <p className="text-[11px] font-semibold uppercase tracking-[0.4em] text-gray-500">
-              Why it matters
+              {getLocalizedLabel('whyItMatters', language)}
             </p>
             <p className="text-sm leading-relaxed text-gray-700 line-clamp-2 dark:text-gray-200">
               {whyPreview || 'A short update worth your attention.'}
@@ -119,7 +120,7 @@ export const ArticleCard = forwardRef<HTMLDivElement, ArticleCardProps>(
               href={`/article/${article.id}?lang=${language}`}
               className="inline-flex items-center gap-2 rounded-full bg-gray-900 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white transition hover:-translate-y-[1px] hover:shadow-md"
             >
-              Read more →
+              {getLocalizedLabel('readMore', language)}
             </Link>
           </div>
         </div>

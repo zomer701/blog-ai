@@ -37,10 +37,7 @@ export interface Article {
     text: string;
     images: string[];
   };
-  translations?: {
-    es: Translation;
-    ukr: Translation;
-  };
+  translations?: Record<string, Translation>;
   metadata: {
     word_count?: number;
     reading_time?: string;
