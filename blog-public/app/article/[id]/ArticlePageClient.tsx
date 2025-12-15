@@ -54,6 +54,24 @@ type Props = {
   initialLanguage: Language;
 };
 
+const TAG_GRADIENTS: Record<string, string> = {
+  openai: 'linear-gradient(135deg, rgba(16,163,127,0.15) 0%, rgba(14,165,233,0.05) 100%)',
+  anthropic: 'linear-gradient(135deg, rgba(217,119,87,0.18) 0%, rgba(79,70,229,0.05) 100%)',
+  arxiv: 'linear-gradient(135deg, rgba(179,27,27,0.18) 0%, rgba(251,191,36,0.08) 100%)',
+  deepmind: 'linear-gradient(135deg, rgba(66,133,244,0.18) 0%, rgba(15,23,42,0.03) 100%)',
+  nvidia: 'linear-gradient(135deg, rgba(118,185,0,0.18) 0%, rgba(15,23,42,0.03) 100%)',
+  meta: 'linear-gradient(135deg, rgba(0,100,224,0.18) 0%, rgba(15,23,42,0.03) 100%)',
+  huggingface: 'linear-gradient(135deg, rgba(255,210,30,0.18) 0%, rgba(15,23,42,0.03) 100%)',
+  scale: 'linear-gradient(135deg, rgba(0,0,0,0.18) 0%, rgba(15,23,42,0.03) 100%)',
+};
+
+const getTagGradient = (tags: string[]): string => {
+  const normalized = tags
+    .map((tag) => tag.replace(/^#/, '').trim().toLowerCase())
+    .find((value) => value && TAG_GRADIENTS[value]);
+  return normalized ? TAG_GRADIENTS[normalized] : TAG_GRADIENTS.openai;
+};
+
 export function ArticlePageClient({ article, initialLanguage }: Props) {
   const handleBack = useCallback(() => {
     if (typeof window !== 'undefined') {
@@ -160,6 +178,11 @@ export function ArticlePageClient({ article, initialLanguage }: Props) {
     [setCookieLanguage]
   );
 
+  const articleGradient = useMemo(
+    () => getTagGradient(article.metadata.tags ?? []),
+    [article.metadata.tags]
+  );
+
   const formattedDate = useMemo(() => {
     try {
       return new Date(article.published_date).toLocaleDateString('en-US', {
@@ -179,7 +202,13 @@ export function ArticlePageClient({ article, initialLanguage }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white text-gray-900">
+    <div
+      className="min-h-screen text-gray-900"
+      style={{
+        backgroundColor: '#f9fafb',
+        backgroundImage: articleGradient,
+      }}
+    >
       <HeaderBar
         className="sticky top-0 z-30 border-b border-gray-200"
         language={language}
